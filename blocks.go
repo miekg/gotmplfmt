@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/alecthomas/chroma/v2"
@@ -24,7 +25,9 @@ func Blocks(tokens []chroma.Token) []Block {
 	b := Block{}
 	open := false
 	for _, t := range tokens {
-		println(t.Type.String(), t.Value)
+		if *flagToken {
+			fmt.Printf("[%s] %s\n", t.Type.String(), t.Value)
+		}
 		if strings.Count(t.Value, "\n") > 1 && strings.TrimSpace(t.Value) == "" { // closing newline and empty line
 			blocks = append(blocks, Block{Keyword: keyOTHER})
 			continue
@@ -48,9 +51,13 @@ func Blocks(tokens []chroma.Token) []Block {
 			if open {
 				switch t.Value {
 				case "if":
-					b.Keyword = keyIF
-					b.Step = 1
 					// this "eats" else if seen before, track that.
+					if b.Keyword == keyELSE {
+						b.Keyword = keyELSEIF
+					} else {
+						b.Keyword = keyIF
+						b.Step = 1
+					}
 				case "else":
 					b.Keyword = keyELSE
 				case "with":

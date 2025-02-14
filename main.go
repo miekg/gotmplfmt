@@ -29,7 +29,7 @@ const (
 )
 
 var (
-	flagType = flag.Bool("t", false, "print type information")
+	flagToken = flag.Bool("t", false, "print tokens")
 )
 
 func main() {
@@ -57,7 +57,7 @@ func main() {
 		}
 
 		// dedent only the keyword (for else, and ...)
-		if b.Keyword == keyELSE {
+		if b.Keyword == keyELSE || b.Keyword == keyELSEIF {
 			fmt.Printf("%s%s\n", indent(level-1), b)
 			continue
 		}
