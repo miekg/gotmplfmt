@@ -24,6 +24,7 @@ func Blocks(tokens []chroma.Token) []Block {
 	b := Block{}
 	open := false
 	for _, t := range tokens {
+		println(t.Type.String(), t.Value)
 		if strings.Count(t.Value, "\n") > 1 && strings.TrimSpace(t.Value) == "" { // closing newline and empty line
 			blocks = append(blocks, Block{Keyword: keyOTHER})
 			continue
@@ -49,8 +50,15 @@ func Blocks(tokens []chroma.Token) []Block {
 				case "if":
 					b.Keyword = keyIF
 					b.Step = 1
+					// this "eats" else if seen before, track that.
 				case "else":
 					b.Keyword = keyELSE
+				case "with":
+					b.Keyword = keyWITH
+					b.Step = 1
+				case "range":
+					b.Keyword = keyRANGE
+					b.Step = 1
 				case "end":
 					b.Keyword = keyEND
 					b.Step = -1
@@ -87,8 +95,16 @@ func (b Block) String() string {
 	if b.Keyword == keyOTHER {
 		return b.Value
 	}
-	if b.Value != "" {
-		return b.OpenTag + " " + string(b.Keyword) + " " + b.Value + " " + b.CloseTag
+
+	keyword := string(b.Keyword)
+	if keyword != "" { // it can be "" is there is just a pipeline without any keywords
+		keyword = " " + keyword + " "
+	} else {
+		keyword = " "
 	}
-	return b.OpenTag + " " + string(b.Keyword) + " " + b.CloseTag
+
+	if b.Value != "" {
+		return b.OpenTag + keyword + b.Value + " " + b.CloseTag
+	}
+	return b.OpenTag + keyword + b.CloseTag
 }

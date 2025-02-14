@@ -18,8 +18,11 @@ const (
 	keyEND      Keyword = "end"
 	keyIF       Keyword = "if"
 	keyRANGE    Keyword = "range"
+	keyWITH     Keyword = "with"
 	keyELSE     Keyword = "else"
+	keyELSEIF   Keyword = "else if"
 	keyDEFINE   Keyword = "define"
+	keyBLOCK    Keyword = "block"
 	keyTEMPLATE Keyword = "template"
 )
 
