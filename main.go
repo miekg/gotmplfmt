@@ -37,11 +37,11 @@ func printAST(node parse.Node, depth int) {
 	indent := strings.Repeat("  ", depth)
 	switch n := node.(type) {
 	case *parse.ActionNode:
-		fmt.Printf("%sActionNode: %s\n", indent, n.Pipe)
+		fmt.Printf("%s action %s\n", indent, n.String())
 	case *parse.TextNode:
-		fmt.Printf("%sTextNode: %q\n", indent, n.Text)
+		fmt.Printf("%s text %s %s\n", indent, n.String(), n.Text)
 	case *parse.IfNode:
-		fmt.Printf("%sIfNode:\n", indent)
+		fmt.Printf("%sIfNode:%s\n", indent, n.String())
 		printAST(n.Pipe, depth+1)
 		printAST(n.List, depth+1)
 		if n.ElseList != nil {
@@ -67,16 +67,18 @@ func printAST(node parse.Node, depth int) {
 			printAST(cmd, depth+1)
 		}
 	case *parse.CommandNode:
-		fmt.Printf("%sCommandNode:\n", indent)
+		fmt.Printf("%sCommandNode: %s\n", indent, n.String())
 		for _, arg := range n.Args {
 			printAST(arg, depth+1)
 		}
 	case *parse.FieldNode:
-		fmt.Printf("%sFieldNode: %s\n", indent, n.Ident)
+		fmt.Printf("%s field %s", indent, n.Ident)
 	case *parse.VariableNode:
-		fmt.Printf("%sVariableNode: %s\n", indent, n.Ident)
+		fmt.Printf("%s var %s", indent, n.Ident)
 	case *parse.TemplateNode:
-		fmt.Printf("%sTemplateNode: %s\n", indent, n.String())
+		fmt.Printf("%s %s", indent, n.String())
+	case *parse.CommentNode:
+		fmt.Printf("%s %s", indent, n.String())
 	default:
 		fmt.Printf("%sUnknown Node: %T\n", indent, n)
 	}
