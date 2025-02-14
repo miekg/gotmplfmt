@@ -16,6 +16,8 @@ type Block struct {
 	Step     int // How to indent: -1, indent less, 1 indent more.
 }
 
+const CommentPreprocClose = 1
+
 // Blocks converts a stream of tokens to blocks. I.e. an if "statement" is: {{if .Flash }}
 // [CommentPreproc {{] [Keyword if] [TextWhitespace  ][NameAttribute .Flash][CommentPreproc }}]. The basic algo is to
 // grab everything between commentpreprocs and slam a keyword on it. We need to track the opening and closing brace
@@ -24,15 +26,11 @@ func Blocks(tokens []chroma.Token) []Block {
 	blocks := []Block{}
 	b := Block{}
 	open := false
+
 	for _, t := range tokens {
 		if *flagToken {
 			fmt.Printf("[%s] %s\n", t.Type.String(), t.Value)
 		}
-		if strings.Count(t.Value, "\n") > 1 && strings.TrimSpace(t.Value) == "" { // closing newline and empty line
-			blocks = append(blocks, Block{Keyword: keyOTHER})
-			continue
-		}
-		t.Value = strings.TrimSpace(t.Value)
 
 		switch t.Type {
 		case chroma.CommentPreproc:
@@ -46,6 +44,11 @@ func Blocks(tokens []chroma.Token) []Block {
 
 			open = !open
 			continue
+
+		case chroma.TextWhitespace:
+			if open { // normalize in {{
+				t.Value = " "
+			}
 
 		case chroma.Keyword:
 			if open {
@@ -86,17 +89,15 @@ func Blocks(tokens []chroma.Token) []Block {
 			continue
 		}
 
-		if t.Value == "" {
+		if open {
+			b.Value += t.Value
 			continue
 		}
-
-		if open {
-			if b.Value == "" {
-				b.Value = t.Value
-			} else {
-				b.Value += " " + t.Value
+		if t.Type == chroma.Other {
+			if strings.TrimSpace(t.Value) == "" {
+				// ignore the whitespace (as chroma.Other) after a preproc
+				continue
 			}
-			continue
 		}
 
 		// not open, add the token at hand to the list as a block.

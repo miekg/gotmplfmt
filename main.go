@@ -49,16 +49,21 @@ func main() {
 	blocks := Blocks(iterator.Tokens())
 	level := 0
 	for _, b := range blocks {
+		switch b.Keyword {
+		case keyELSE, keyELSEIF, keyEND, keyWITH, keyIF, keyRANGE, keyBLOCK:
+			fmt.Printf("\n%s", indent(level))
+		}
+
 		// if b.Step is postive, it applies after the element being printed
 		if b.Step > 0 {
-			fmt.Printf("%s%s\n", indent(level), b)
+			fmt.Printf("%s\n%s", b, indent(level))
 			level += b.Step
 			continue
 		}
 
-		// dedent only the keyword (for else, and ...)
+		// dedent only the keyword
 		if b.Keyword == keyELSE || b.Keyword == keyELSEIF {
-			fmt.Printf("%s%s\n", indent(level-1), b)
+			fmt.Printf("%s%s\n%s", indent(level-1), b, indent(level))
 			continue
 		}
 
@@ -66,7 +71,17 @@ func main() {
 		if level < 0 { // {{end}} are also used when we haven't raised the indentlevel
 			level = 0
 		}
-		fmt.Printf("%s%s\n", indent(level), b)
+		if b.Keyword == keyOTHER {
+			fmt.Print(b)
+			continue
+		}
+		fmt.Printf("%s", b)
+		switch b.Keyword {
+		case keyEND:
+			fmt.Printf("\n%s", indent(level))
+		case keyTEMPLATE, keyCONTINUE, keyBREAK:
+			fmt.Printf("\n%s", indent(level))
+		}
 	}
 }
 
