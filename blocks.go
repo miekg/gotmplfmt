@@ -84,6 +84,8 @@ func Blocks(tokens []chroma.Token) []Block {
 					b.Keyword = keyBREAK
 				case "continue":
 					b.Keyword = keyCONTINUE
+				default: // operators 'n such
+					b.Value += t.Value
 				}
 			}
 			continue

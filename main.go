@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/alecthomas/chroma/v2/lexers"
 )
@@ -49,21 +48,16 @@ func main() {
 	blocks := Blocks(iterator.Tokens())
 	level := 0
 	for _, b := range blocks {
-		switch b.Keyword {
-		case keyELSE, keyELSEIF, keyEND, keyWITH, keyIF, keyRANGE, keyBLOCK:
-			fmt.Printf("\n%s", indent(level))
-		}
-
 		// if b.Step is postive, it applies after the element being printed
 		if b.Step > 0 {
-			fmt.Printf("%s\n%s", b, indent(level))
+			fmt.Printf("%s", b)
 			level += b.Step
 			continue
 		}
 
 		// dedent only the keyword
 		if b.Keyword == keyELSE || b.Keyword == keyELSEIF {
-			fmt.Printf("%s%s\n%s", indent(level-1), b, indent(level))
+			fmt.Printf("%s", b)
 			continue
 		}
 
@@ -76,18 +70,5 @@ func main() {
 			continue
 		}
 		fmt.Printf("%s", b)
-		switch b.Keyword {
-		case keyEND:
-			fmt.Printf("\n%s", indent(level))
-		case keyTEMPLATE, keyCONTINUE, keyBREAK:
-			fmt.Printf("\n%s", indent(level))
-		}
 	}
-}
-
-func indent(level int) string {
-	if level < 0 {
-		level = 0
-	}
-	return strings.Repeat("\t", level)
 }
