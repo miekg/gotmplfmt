@@ -1,85 +1,73 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strings"
-	"text/template/parse"
+
+	"github.com/alecthomas/chroma/v2/lexers"
+)
+
+type Keyword string
+
+const (
+	keyOTHER    Keyword = "other"
+	keyEND      Keyword = "end"
+	keyIF       Keyword = "if"
+	keyRANGE    Keyword = "range"
+	keyELSE     Keyword = "else"
+	keyDEFINE   Keyword = "define"
+	keyTEMPLATE Keyword = "template"
+)
+
+var (
+	flagType = flag.Bool("t", false, "print type information")
 )
 
 func main() {
-	buf, err := io.ReadAll(os.Stdin)
+	flag.Parse()
+	lexer := lexers.Get("go-template")
+	if lexer == nil {
+		log.Fatal("No lexer seen")
+	}
+	contents, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Example template
-	tmpl := string(buf)
-
-	treeSet := make(map[string]*parse.Tree)
-	t := parse.New("example")
-	t.Mode = parse.ParseComments | parse.SkipFuncCheck
-	tree, err := t.Parse(tmpl, "{{", "}}", treeSet)
+	iterator, err := lexer.Tokenise(nil, string(contents))
 	if err != nil {
-		fmt.Println("Error parsing template:", err)
-		return
+		log.Fatal(err)
 	}
+	blocks := Blocks(iterator.Tokens())
+	level := 0
+	for _, b := range blocks {
+		// if b.Step is postive, it applies after the element being printed
+		if b.Step > 0 {
+			fmt.Printf("%s%s\n", indent(level), b)
+			level += b.Step
+			continue
+		}
 
-	// Access the root of the AST
-	root := tree.Root
+		// dedent only the keyword (for else, and ...)
+		if b.Keyword == keyELSE {
+			fmt.Printf("%s%s\n", indent(level-1), b)
+			continue
+		}
 
-	// Print the AST
-	printAST(root, 0)
+		level += b.Step
+		if level < 0 { // {{end}} are also used when we haven't raised the indentlevel
+			level = 0
+		}
+		fmt.Printf("%s%s\n", indent(level), b)
+	}
 }
 
-func printAST(node parse.Node, depth int) {
-	indent := strings.Repeat("  ", depth)
-	switch n := node.(type) {
-	case *parse.ActionNode:
-		fmt.Printf("%s action %s\n", indent, n.String())
-	case *parse.TextNode:
-		fmt.Printf("%s text %s %s\n", indent, n.String(), n.Text)
-	case *parse.IfNode:
-		fmt.Printf("%sIfNode:%s\n", indent, n.String())
-		printAST(n.Pipe, depth+1)
-		printAST(n.List, depth+1)
-		if n.ElseList != nil {
-			fmt.Printf("%sElse:\n", indent)
-			printAST(n.ElseList, depth+1)
-		}
-	case *parse.RangeNode:
-		fmt.Printf("%sRangeNode:\n", indent)
-		printAST(n.Pipe, depth+1)
-		printAST(n.List, depth+1)
-		if n.ElseList != nil {
-			fmt.Printf("%sElse:\n", indent)
-			printAST(n.ElseList, depth+1)
-		}
-	case *parse.ListNode:
-		fmt.Printf("%sListNode:\n", indent)
-		for _, child := range n.Nodes {
-			printAST(child, depth+1)
-		}
-	case *parse.PipeNode:
-		fmt.Printf("%sPipeNode:\n", indent)
-		for _, cmd := range n.Cmds {
-			printAST(cmd, depth+1)
-		}
-	case *parse.CommandNode:
-		fmt.Printf("%sCommandNode: %s\n", indent, n.String())
-		for _, arg := range n.Args {
-			printAST(arg, depth+1)
-		}
-	case *parse.FieldNode:
-		fmt.Printf("%s field %s", indent, n.Ident)
-	case *parse.VariableNode:
-		fmt.Printf("%s var %s", indent, n.Ident)
-	case *parse.TemplateNode:
-		fmt.Printf("%s %s", indent, n.String())
-	case *parse.CommentNode:
-		fmt.Printf("%s %s", indent, n.String())
-	default:
-		fmt.Printf("%sUnknown Node: %T\n", indent, n)
+func indent(level int) string {
+	if level < 0 {
+		level = 0
 	}
+	return strings.Repeat("\t", level)
 }
