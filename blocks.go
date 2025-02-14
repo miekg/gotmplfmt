@@ -115,7 +115,7 @@ func (b Block) String() string {
 
 	keyword := string(b.Keyword)
 	if keyword != "" { // it can be "" is there is just a pipeline without any keywords
-		keyword = " " + keyword + " "
+		keyword = " " + keyword
 	} else {
 		keyword = " "
 	}
@@ -123,5 +123,5 @@ func (b Block) String() string {
 	if b.Value != "" {
 		return b.OpenTag + keyword + b.Value + " " + b.CloseTag
 	}
-	return b.OpenTag + keyword + b.CloseTag
+	return b.OpenTag + keyword + " " + b.CloseTag
 }
