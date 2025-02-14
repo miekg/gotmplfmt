@@ -67,6 +67,13 @@ func Blocks(tokens []chroma.Token) []Block {
 					b.Step = 1
 				case "template":
 					b.Keyword = keyTEMPLATE
+				case "block":
+					b.Keyword = keyBLOCK
+					b.Step = 1
+				case "break":
+					b.Keyword = keyBREAK
+				case "continue":
+					b.Keyword = keyCONTINUE
 				}
 			}
 			continue

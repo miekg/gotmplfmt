@@ -24,6 +24,8 @@ const (
 	keyDEFINE   Keyword = "define"
 	keyBLOCK    Keyword = "block"
 	keyTEMPLATE Keyword = "template"
+	keyBREAK    Keyword = "break"
+	keyCONTINUE Keyword = "continue"
 )
 
 var (
