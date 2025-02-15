@@ -25,6 +25,7 @@ const (
 	keyTEMPLATE Keyword = "template"
 	keyBREAK    Keyword = "break"
 	keyCONTINUE Keyword = "continue"
+	keyPIPE     Keyword = "n/a" // bare pipeline
 )
 
 var (
@@ -46,25 +47,14 @@ func main() {
 		log.Fatal(err)
 	}
 	blocks := Blocks(iterator.Tokens())
-	level := 0
+	//	level := 0
 	for _, b := range blocks {
-		// if b.Step is postive, it applies after the element being printed
-		if b.Step > 0 {
-			fmt.Printf("%s", b)
-			level += b.Step
-			continue
-		}
-
 		// dedent only the keyword
 		if b.Keyword == keyELSE || b.Keyword == keyELSEIF {
 			fmt.Printf("%s", b)
 			continue
 		}
 
-		level += b.Step
-		if level < 0 { // {{end}} are also used when we haven't raised the indentlevel
-			level = 0
-		}
 		if b.Keyword == keyOTHER {
 			fmt.Print(b)
 			continue

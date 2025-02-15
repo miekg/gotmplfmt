@@ -13,7 +13,6 @@ type Block struct {
 	Value    string
 	OpenTag  string // if a keyword, holds the opening tag, may contain a -.
 	CloseTag string
-	Step     int // How to indent: -1, indent less, 1 indent more.
 }
 
 const CommentPreprocClose = 1
@@ -28,6 +27,8 @@ func Blocks(tokens []chroma.Token) []Block {
 	open := false
 
 	for _, t := range tokens {
+		t.Value = strings.TrimSpace(t.Value)
+
 		if *flagToken {
 			fmt.Printf("[%s] %s\n", t.Type.String(), t.Value)
 		}
@@ -43,7 +44,6 @@ func Blocks(tokens []chroma.Token) []Block {
 			}
 
 			open = !open
-			continue
 
 		case chroma.TextWhitespace:
 			if open { // normalize in {{
@@ -59,36 +59,29 @@ func Blocks(tokens []chroma.Token) []Block {
 						b.Keyword = keyELSEIF
 					} else {
 						b.Keyword = keyIF
-						b.Step = 1
 					}
 				case "else":
 					b.Keyword = keyELSE
 				case "with":
 					b.Keyword = keyWITH
-					b.Step = 1
 				case "range":
 					b.Keyword = keyRANGE
-					b.Step = 1
 				case "end":
 					b.Keyword = keyEND
-					b.Step = -1
 				case "define":
 					b.Keyword = keyDEFINE
-					b.Step = 1
 				case "template":
 					b.Keyword = keyTEMPLATE
 				case "block":
 					b.Keyword = keyBLOCK
-					b.Step = 1
 				case "break":
 					b.Keyword = keyBREAK
 				case "continue":
 					b.Keyword = keyCONTINUE
 				default: // operators 'n such
-					b.Value += t.Value
+					b.Keyword = keyPIPE
 				}
 			}
-			continue
 		}
 
 		if open {
@@ -96,8 +89,7 @@ func Blocks(tokens []chroma.Token) []Block {
 			continue
 		}
 		if t.Type == chroma.Other {
-			if strings.TrimSpace(t.Value) == "" {
-				// ignore the whitespace (as chroma.Other) after a preproc
+			if t.Value == "" { // ignore the whitespace (as chroma.Other) after a preproc
 				continue
 			}
 		}
@@ -113,15 +105,5 @@ func (b Block) String() string {
 		return b.Value
 	}
 
-	keyword := string(b.Keyword)
-	if keyword != "" { // it can be "" is there is just a pipeline without any keywords
-		keyword = " " + keyword
-	} else {
-		keyword = " "
-	}
-
-	if b.Value != "" {
-		return b.OpenTag + keyword + b.Value + " " + b.CloseTag
-	}
-	return b.OpenTag + keyword + " " + b.CloseTag
+	return b.OpenTag + string(b.Keyword) + b.Value + b.CloseTag
 }
