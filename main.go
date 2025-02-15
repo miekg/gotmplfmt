@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/alecthomas/chroma/v2/lexers"
 )
@@ -14,6 +15,8 @@ type Keyword string
 
 const (
 	keyOTHER    Keyword = "other"
+	keyLINE     Keyword = "\n"
+	keyCOMMENT  Keyword = "{{/*"
 	keyEND      Keyword = "end"
 	keyIF       Keyword = "if"
 	keyRANGE    Keyword = "range"
@@ -46,19 +49,50 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// For pretty printing we want to indent only when we just have written a newline.
 	blocks := Blocks(iterator.Tokens())
-	//	level := 0
+	newline := false
+	eol := ""
+	level := 0
 	for _, b := range blocks {
-		// dedent only the keyword
-		if b.Keyword == keyELSE || b.Keyword == keyELSEIF {
-			fmt.Printf("%s", b)
-			continue
+		if b.Keyword == keyEND {
+			level--
 		}
 
-		if b.Keyword == keyOTHER {
-			fmt.Print(b)
-			continue
+		if newline {
+			newline = !newline
+			fmt.Print(indent(level))
+
+			// if this block is a keyword block, we close it with a newline
+			if b.Keyword != keyOTHER && b.Keyword != keyPIPE {
+				eol = "\n"
+			}
 		}
-		fmt.Printf("%s", b)
+
+		fmt.Printf("%s%s", b, eol)
+
+		switch b.Keyword {
+		case keyIF, keyRANGE, keyWITH:
+			level++
+		case keyDEFINE:
+			level++
+			fallthrough
+		case keyBLOCK:
+			level++
+			fallthrough
+		case keyCOMMENT:
+			fallthrough
+		case keyTEMPLATE:
+			fmt.Println()
+			newline = true
+		}
+		if !newline {
+			newline = eol != ""
+		}
+		eol = ""
 	}
+	fmt.Println() // closing newline
 }
+
+func indent(level int) string { return strings.Repeat("    ", level) }
