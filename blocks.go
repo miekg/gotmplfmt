@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/chroma/v2"
+	"github.com/yosssi/gohtml"
 )
 
 // Block keeps together multiple tokens. This is used to create easier to handle "open" and "close" tokens.
@@ -42,8 +43,8 @@ func Blocks(tokens []chroma.Token) []Block {
 				blocks = append(blocks, b)
 				b = Block{}
 			}
-
 			open = !open
+			continue
 
 		case chroma.TextWhitespace:
 			if open { // normalize in {{
@@ -80,6 +81,7 @@ func Blocks(tokens []chroma.Token) []Block {
 					b.Keyword = keyCONTINUE
 				default: // operators 'n such
 					b.Keyword = keyPIPE
+					b.Value += t.Value
 				}
 			}
 		}
@@ -102,8 +104,8 @@ func Blocks(tokens []chroma.Token) []Block {
 
 func (b Block) String() string {
 	if b.Keyword == keyOTHER {
-		return b.Value
+		return gohtml.Format(b.Value)
 	}
 
-	return b.OpenTag + string(b.Keyword) + b.Value + b.CloseTag
+	return b.OpenTag + " " + b.Value + " " + b.CloseTag
 }
