@@ -1,98 +1,95 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strings"
-
-	"github.com/alecthomas/chroma/v2/lexers"
-)
-
-type Keyword string
-
-const (
-	keyOTHER    Keyword = "other"
-	keyLINE     Keyword = "\n"
-	keyCOMMENT  Keyword = "{{/*"
-	keyEND      Keyword = "end"
-	keyIF       Keyword = "if"
-	keyRANGE    Keyword = "range"
-	keyWITH     Keyword = "with"
-	keyELSE     Keyword = "else"
-	keyELSEIF   Keyword = "else if"
-	keyDEFINE   Keyword = "define"
-	keyBLOCK    Keyword = "block"
-	keyTEMPLATE Keyword = "template"
-	keyBREAK    Keyword = "break"
-	keyCONTINUE Keyword = "continue"
-	keyPIPE     Keyword = "n/a" // bare pipeline
-)
-
-var (
-	flagToken = flag.Bool("t", false, "print tokens")
+	"text/template/parse"
 )
 
 func main() {
-	flag.Parse()
-	lexer := lexers.Get("go-template")
-	if lexer == nil {
-		log.Fatal("No lexer seen")
-	}
-	contents, err := io.ReadAll(os.Stdin)
-	if err != nil {
-		log.Fatal(err)
-	}
-	iterator, err := lexer.Tokenise(nil, string(contents))
+	buf, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// For pretty printing we want to indent only when we just have written a newline.
-	blocks := Blocks(iterator.Tokens())
-	newline := false
-	eol := ""
-	level := 0
-	for _, b := range blocks {
-		if b.Keyword == keyEND {
-			level--
-		}
-
-		if newline {
-			newline = !newline
-			fmt.Print(indent(level))
-
-			// if this block is a keyword block, we close it with a newline
-			if b.Keyword != keyOTHER && b.Keyword != keyPIPE {
-				eol = "\n"
-			}
-		}
-
-		fmt.Printf("%s%s", b, eol)
-
-		switch b.Keyword {
-		case keyIF, keyRANGE, keyWITH:
-			level++
-		case keyDEFINE:
-			level++
-			fallthrough
-		case keyBLOCK:
-			level++
-			fallthrough
-		case keyCOMMENT:
-			fallthrough
-		case keyTEMPLATE:
-			fmt.Println()
-			newline = true
-		}
-		if !newline {
-			newline = eol != ""
-		}
-		eol = ""
+	tmpl := string(buf)
+	treeSet := make(map[string]*parse.Tree)
+	t := parse.New("Zgotmplfmt")
+	t.Mode = parse.ParseComments | parse.SkipFuncCheck
+	if _, err = t.Parse(tmpl, "{{", "}}", treeSet); err != nil {
+		fmt.Println("Error parsing template:", err)
+		return
 	}
-	fmt.Println() // closing newline
+	for n, ts := range treeSet {
+		fmt.Printf("{{define %q }}\n", n)
+		printAST(ts.Root, 0)
+		fmt.Println("{{end}}")
+	}
 }
 
-func indent(level int) string { return strings.Repeat("    ", level) }
+func printAST(node parse.Node, depth int, elseif ...bool) {
+	fmt.Printf("**KEY %T***\n", node)
+	indent := strings.Repeat("  ", depth)
+	switch n := node.(type) {
+	case *parse.ActionNode:
+		fmt.Printf("%s", n.String())
+	case *parse.TextNode:
+		//format this html
+		fmt.Printf("%s", n.Text)
+	case *parse.StringNode:
+		fmt.Printf("%s", n.Quoted)
+	case *parse.IdentifierNode:
+		fmt.Printf("%s", n.Ident)
+	case *parse.IfNode:
+		if len(elseif) > 0 {
+			fmt.Printf(" if ")
+		} else {
+			fmt.Printf("%s{{if ", indent)
+		}
+		printAST(n.Pipe, depth+1)
+		fmt.Println("}}")
+		printAST(n.List, depth+1)
+		if n.ElseList != nil {
+			if _, ok := n.ElseList.Nodes[0].(*parse.IfNode); ok { // else if construct
+				fmt.Printf("%s{{else ", indent)
+				printAST(n.ElseList, depth+1, true)
+				fmt.Printf("}}\n")
+			} else {
+				fmt.Printf("%s{{else}}", indent)
+				printAST(n.ElseList, depth+1)
+			}
+		}
+		fmt.Printf("{{end}}")
+	case *parse.RangeNode:
+		fmt.Printf("%sRangeNode:\n", indent)
+		printAST(n.Pipe, depth+1)
+		printAST(n.List, depth+1)
+		if n.ElseList != nil {
+			fmt.Printf("%sElse:\n", indent)
+			printAST(n.ElseList, depth+1)
+		}
+	case *parse.ListNode:
+		for _, child := range n.Nodes {
+			printAST(child, depth+1)
+		}
+	case *parse.PipeNode:
+		for _, cmd := range n.Cmds {
+			printAST(cmd, depth+1)
+		}
+	case *parse.CommandNode:
+		for _, arg := range n.Args {
+			printAST(arg, depth+1)
+		}
+	case *parse.FieldNode:
+		fmt.Printf(".%s", strings.Join(n.Ident, "."))
+	case *parse.VariableNode:
+		fmt.Printf("%s var %s", indent, n.Ident)
+	case *parse.TemplateNode:
+		fmt.Printf("%s %s", indent, n.String())
+	default:
+		fmt.Printf("%sUnknown Node: %T\n", indent, n)
+	}
+}
