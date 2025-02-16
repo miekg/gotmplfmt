@@ -27,7 +27,10 @@ func main() {
 		log.Fatalf("Failed to parse template: %s", err)
 	}
 	for n, ts := range treeSet {
-		fmt.Fprintf(w, "{{define %q}}\n", n)
+		// check ts.Root, might also be a block?
+		fmt.Printf("** %T --", ts.Root)
+		fmt.Printf("%d\n", len(ts.Root.Nodes))
+		fmt.Fprintf(w, "{{define %q}}\n***\n", n)
 		w.Pretty(ts.Root, 0)
 		fmt.Fprintf(w, "%s\n", End)
 	}
@@ -43,7 +46,7 @@ func parseTree(buf []byte) (map[string]*parse.Tree, error) {
 }
 
 func (w *W) Pretty(node parse.Node, depth int, elseif ...bool) {
-	//fmt.Fprintf(w, "**KEY %T***\n", node)
+	//	fmt.Fprintf(w, "**KEY %T***\n", node)
 	w.Indent(depth)
 	switch n := node.(type) {
 	case *parse.ActionNode:
