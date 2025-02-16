@@ -31,21 +31,21 @@ func main() {
 }
 
 func printAST(node parse.Node, depth int, elseif ...bool) {
-	fmt.Printf("**KEY %T***\n", node)
+	//		fmt.Printf("**KEY %T***\n", node)
 	indent := strings.Repeat("  ", depth)
 	switch n := node.(type) {
 	case *parse.ActionNode:
 		fmt.Printf("%s", n.String())
 	case *parse.TextNode:
 		//format this html
-		fmt.Printf("%s", n.Text)
+		fmt.Printf("T %s", n.Text)
 	case *parse.StringNode:
 		fmt.Printf("%s", n.Quoted)
 	case *parse.IdentifierNode:
 		fmt.Printf("%s", n.Ident)
 	case *parse.IfNode:
 		if len(elseif) > 0 {
-			fmt.Printf(" if ")
+			fmt.Printf("if ")
 		} else {
 			fmt.Printf("%s{{if ", indent)
 		}
@@ -55,14 +55,17 @@ func printAST(node parse.Node, depth int, elseif ...bool) {
 		if n.ElseList != nil {
 			if _, ok := n.ElseList.Nodes[0].(*parse.IfNode); ok { // else if construct
 				fmt.Printf("%s{{else ", indent)
-				printAST(n.ElseList, depth+1, true)
-				fmt.Printf("}}\n")
+				printAST(n.ElseList.Nodes[0], depth+1, true)
+				for _, child := range n.ElseList.Nodes[1:] {
+					printAST(child, depth+1)
+				}
+				return
 			} else {
 				fmt.Printf("%s{{else}}", indent)
 				printAST(n.ElseList, depth+1)
 			}
 		}
-		fmt.Printf("{{end}}")
+		fmt.Printf("{{end}}\n")
 	case *parse.RangeNode:
 		fmt.Printf("%sRangeNode:\n", indent)
 		printAST(n.Pipe, depth+1)
