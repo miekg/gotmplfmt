@@ -70,16 +70,18 @@ func (w *W) Pretty(node parse.Node, depth int, elseif ...bool) {
 		if n.ElseList != nil {
 			if _, ok := n.ElseList.Nodes[0].(*parse.IfNode); ok { // else if construct
 				fmt.Fprintf(w, "%s{{else ", indent)
-				w.Pretty(n.ElseList.Nodes[0], depth+1, true)
+				w.Pretty(n.ElseList.Nodes[0], depth, true)
 				for _, child := range n.ElseList.Nodes[1:] {
-					w.Pretty(child, depth)
+					w.Pretty(child, depth+1)
 				}
 				return
 			} else {
 				fmt.Fprintf(w, "%s{{else}}", indent)
-				w.Pretty(n.ElseList, depth)
+				w.Newline()
+				w.Pretty(n.ElseList, depth+1)
 			}
 		}
+		w.Indent(depth)
 		fmt.Fprintf(w, "%s\n", End)
 	case *parse.RangeNode:
 		fmt.Fprintf(w, "%sRangeNode:\n", indent)
