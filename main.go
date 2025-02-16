@@ -49,8 +49,7 @@ func (w *W) Pretty(node parse.Node, depth int, elseif ...bool) {
 	case *parse.ActionNode:
 		fmt.Fprintf(w, "%s", n.String())
 	case *parse.TextNode:
-		// depth needed
-		w.Text(n.Text)
+		w.Text(n.Text, depth)
 		w.Newline()
 	case *parse.StringNode:
 		fmt.Fprintf(w, "%s", n.Quoted)

@@ -2,12 +2,13 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"strings"
+
+	"github.com/yosssi/gohtml"
 )
 
-const indent = "-*-*"
+const indent = "   +"
 
 type W struct {
 	lineWritten   bool // if true data has been written to the current line.
@@ -26,8 +27,18 @@ func (w *W) Write(data []byte) (int, error) {
 	return w.w.Write(data)
 }
 
-func (w *W) Text(t []byte) error {
-	_, err := w.w.Write(t)
+func (w *W) Text(t []byte, depth int) error {
+	// Differ between oneliners (which may also result in that the rest of the line is one the same line) and
+	// multiple lines.
+	//
+	// We also assume the first line is indented, and that we must indent the rest of the line.
+	formatted := gohtml.FormatBytes(t)
+	if len(formatted) != 0 {
+		_, err := w.w.Write(indentBytes(formatted, depth))
+		return err
+	}
+
+	_, err := w.w.Write(indentBytes(t, depth))
 	return err
 }
 
@@ -45,7 +56,19 @@ func (w *W) Indent(depth int) error {
 	if w.indentWritten {
 		return nil
 	}
-	io.WriteString(w.w, fmt.Sprintf("[%d] ", depth))
+	//	io.WriteString(w.w, fmt.Sprintf("[%d] ", depth))
 	_, err := io.WriteString(w.w, strings.Repeat(indent, depth))
 	return err
+}
+
+// indentBytes indents every line, except the first.
+func indentBytes(b []byte, depth int) []byte {
+	if bytes.Count(b, []byte("\n")) <= 1 { // single line, just return
+		return b
+	}
+
+	in := bytes.Repeat([]byte(indent), depth)
+	in = append([]byte("\n"), in...)
+	b = bytes.Replace(b, []byte("\n"), in, -1)
+	return b
 }
