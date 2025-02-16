@@ -62,7 +62,7 @@ func (w *W) Pretty(node parse.Node, depth int, elseif ...bool) {
 		} else {
 			fmt.Fprint(w, "{{if ")
 		}
-		w.Pretty(n.Pipe, depth+1)
+		w.Pretty(n.Pipe, depth)
 
 		fmt.Fprintln(w, "}}")
 
