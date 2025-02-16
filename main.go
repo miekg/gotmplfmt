@@ -27,7 +27,7 @@ func main() {
 		log.Fatalf("Failed to parse template: %s", err)
 	}
 	for n, ts := range treeSet {
-		fmt.Fprintf(w, "{{define %q }}\n", n)
+		fmt.Fprintf(w, "{{define %q}}\n", n)
 		w.Pretty(ts.Root, 0)
 		fmt.Fprintf(w, "%s\n", End)
 	}
@@ -43,41 +43,44 @@ func parseTree(buf []byte) (map[string]*parse.Tree, error) {
 }
 
 func (w *W) Pretty(node parse.Node, depth int, elseif ...bool) {
-	//		fmt.Fprintf(w, "**KEY %T***\n", node)
-	indent := strings.Repeat("  ", depth)
+	//fmt.Fprintf(w, "**KEY %T***\n", node)
+	w.Indent(depth)
 	switch n := node.(type) {
 	case *parse.ActionNode:
 		fmt.Fprintf(w, "%s", n.String())
 	case *parse.TextNode:
-		//format this html
-		fmt.Fprintf(w, "T %s", n.Text)
+		// depth needed
+		w.Text(n.Text)
+		w.Newline()
 	case *parse.StringNode:
 		fmt.Fprintf(w, "%s", n.Quoted)
 	case *parse.IdentifierNode:
 		fmt.Fprintf(w, "%s", n.Ident)
 	case *parse.IfNode:
-		if len(elseif) > 0 {
+		if len(elseif) > 0 { // we are in a {{else if ...
 			fmt.Fprintf(w, "if ")
 		} else {
-			fmt.Fprintf(w, "%s{{if ", indent)
+			fmt.Fprint(w, "{{if ")
 		}
 		w.Pretty(n.Pipe, depth+1)
-		fmt.Println("}}")
+
+		fmt.Fprintln(w, "}}")
+
 		w.Pretty(n.List, depth+1)
 		if n.ElseList != nil {
 			if _, ok := n.ElseList.Nodes[0].(*parse.IfNode); ok { // else if construct
 				fmt.Fprintf(w, "%s{{else ", indent)
 				w.Pretty(n.ElseList.Nodes[0], depth+1, true)
 				for _, child := range n.ElseList.Nodes[1:] {
-					w.Pretty(child, depth+1)
+					w.Pretty(child, depth)
 				}
 				return
 			} else {
 				fmt.Fprintf(w, "%s{{else}}", indent)
-				w.Pretty(n.ElseList, depth+1)
+				w.Pretty(n.ElseList, depth)
 			}
 		}
-		fmt.Fprintf(w, "{{end}}\n")
+		fmt.Fprintf(w, "%s\n", End)
 	case *parse.RangeNode:
 		fmt.Fprintf(w, "%sRangeNode:\n", indent)
 		w.Pretty(n.Pipe, depth+1)
