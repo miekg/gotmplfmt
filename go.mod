@@ -1,4 +1,4 @@
-module github.com/miekg/gohtmlfmt
+module github.com/miekg/gotmplfmt
 
 go 1.24.0
 
