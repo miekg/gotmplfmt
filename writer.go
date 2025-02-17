@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const indent = "   +"
+var indent = "    "
 
 type W struct {
 	active bool // if true data has been written to the current line, including an indentation
