@@ -10,6 +10,7 @@ var indent = "    "
 
 type W struct {
 	active bool // if true data has been written to the current line, including an indentation
+	Single bool // if true ignore new lines
 	w      io.Writer
 }
 
@@ -17,6 +18,9 @@ func New(w io.Writer) *W { return &W{w: w} }
 
 func (w *W) Write(data []byte) (int, error) {
 	w.active = true
+	if w.Single {
+		data = bytes.ReplaceAll(data, []byte("\n"), nil)
+	}
 	if bytes.HasSuffix(data, []byte("\n")) {
 		w.active = false
 	}
