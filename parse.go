@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Node is the parse tree of a template.
@@ -54,15 +55,29 @@ func Parse(tokens []Token) *Node {
 	}
 
 	tree := NewNode(nil)
-	tree.Parent = tree
 	tree.parse(tokens)
 
 	return tree
 }
 
-func Pretty(n *Node, depth int) {
-	fmt.Printf("[%d] %q\n", depth, n.Token.Value)
+func Pretty(w *W, n *Node, depth int) {
+	// The root token, depth = 0, does not contain anything, just the beginning of tree, skip it.
+	if n.Parent != nil {
+		d := depth - 1
+		if n.Token.Subtype == End { // pull in {{end}}s
+			d--
+		}
+
+		w.Indent(d)
+		// debug flag?
+		//fmt.Fprintf(w, "[%d] %q\n", d, n.Token.Value)
+		if n.Token.Type == TokenText && strings.Count(n.Token.Value, "\n") > 0 { // formatted multieline html
+			n.Token.Value = IndentString(n.Token.Value, d)
+		}
+
+		fmt.Fprintln(w, n.Token.Value)
+	}
 	for i := range n.List {
-		Pretty(n.List[i], depth+1)
+		Pretty(w, n.List[i], depth+1)
 	}
 }

@@ -12,5 +12,6 @@ func main() {
 	tree := Parse(lexer.Lex())
 
 	println("**AST**")
-	Pretty(tree, 0)
+	w := New(os.Stdout)
+	Pretty(w, tree, 0)
 }
