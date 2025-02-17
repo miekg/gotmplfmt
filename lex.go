@@ -2,6 +2,7 @@ package main
 
 import (
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -26,15 +27,15 @@ const (
 	Pipe TokenSubtype = iota // pipe is anything in {{ that is not a keyword
 	Block
 	Define
+	Template
 	Break
 	Continue
 	ElseIf
 	Else
-	End
 	If
 	Range
-	Template
 	With
+	End
 )
 
 var Subtypes = map[string]TokenSubtype{
@@ -78,9 +79,13 @@ type Lexer struct {
 }
 
 // NewLexer creates a new lexer for the given input.
-func NewLexer(input string) *Lexer {
-	return &Lexer{input: input}
-}
+func NewLexer(input string) *Lexer { return &Lexer{input: input} }
+
+// Lex runs the lexer and returns the tokens.
+func (l *Lexer) Lex() []Token { l.lexText(); return l.tokens }
+
+// backup steps back one rune.
+func (l *Lexer) backup() { l.pos -= l.width }
 
 // next returns the next rune in the input.
 func (l *Lexer) next() rune {
@@ -92,11 +97,6 @@ func (l *Lexer) next() rune {
 	l.width = w
 	l.pos += l.width
 	return r
-}
-
-// backup steps back one rune.
-func (l *Lexer) backup() {
-	l.pos -= l.width
 }
 
 // emit adds a token to the token list.
@@ -129,6 +129,14 @@ func (l *Lexer) emit(t TokenType) {
 				subtype = Subtypes[s]
 				break Loop
 			}
+		}
+	}
+
+	// If the token start with space and when trimmed is empty, we skip this token.
+	if t == TokenText {
+		if trimmed := strings.TrimLeftFunc(value, unicode.IsSpace); len(trimmed) == 0 {
+			l.start = l.pos
+			return
 		}
 	}
 
@@ -180,10 +188,4 @@ func (l *Lexer) lexTemplate() {
 			l.backup()
 		}
 	}
-}
-
-// Lex runs the lexer and returns the tokens.
-func (l *Lexer) Lex() []Token {
-	l.lexText()
-	return l.tokens
 }

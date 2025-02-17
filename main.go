@@ -8,5 +8,9 @@ import (
 func main() {
 	buf, _ := io.ReadAll(os.Stdin)
 	lexer := NewLexer(string(buf))
-	Parse(lexer.Lex())
+
+	tree := Parse(lexer.Lex())
+
+	println("**AST**")
+	Pretty(tree, 0)
 }
