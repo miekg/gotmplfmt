@@ -4,8 +4,6 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
-
-	"github.com/yosssi/gohtml"
 )
 
 // TokenType represents the type of token.
@@ -171,11 +169,6 @@ func (l *Lexer) emit(t TokenType) {
 		// If the remainder contains 1 newline, we trim the whitespace at the end too
 		if strings.Count(value, "\n") == 1 {
 			value = strings.TrimRightFunc(value, unicode.IsSpace)
-		}
-		// Try to fmt the HTML, if fails use the original value
-		formatted := gohtml.Format(value)
-		if formatted != "" {
-			value = formatted
 		}
 	}
 

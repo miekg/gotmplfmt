@@ -19,6 +19,8 @@ func main() {
 	lexer := NewLexer(string(buf))
 
 	tokens := lexer.Lex()
+	// Collapse multiple TokenTexts into one if there are no container elements in the middle
+
 	tree := Parse(tokens)
 	if *flagToken {
 		for _, token := range tokens {
