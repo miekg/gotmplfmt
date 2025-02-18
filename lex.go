@@ -47,17 +47,16 @@ func Container(s TokenSubtype) bool {
 		fallthrough
 	case Define:
 		fallthrough
-	case ElseIf:
-		fallthrough // elseif really container type, we need only 1 end
-	case Else:
-		fallthrough
+	//	case ElseIf:  // not a container type as the end is for the if not the else
+	//		fallthrough
+	//	case Else:
+	//		fallthrough
 	case If:
 		fallthrough
 	case Range:
 		fallthrough
 	case With:
 		return true
-
 	}
 
 	return false
