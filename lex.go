@@ -26,7 +26,7 @@ type Token struct {
 type TokenSubtype int
 
 const (
-	Pipe TokenSubtype = iota // pipe is anything in {{ that is not a keyword
+	Pipe TokenSubtype = iota // Pipe is anything in {{ that is not a keyword
 	Block
 	Define
 	Template
@@ -40,12 +40,35 @@ const (
 	End
 )
 
+// Container returns true if the TokenSubType is a container type
+func Container(s TokenSubtype) bool {
+	switch s {
+	case Block:
+		fallthrough
+	case Define:
+		fallthrough
+	case ElseIf:
+		fallthrough // elseif really container type, we need only 1 end
+	case Else:
+		fallthrough
+	case If:
+		fallthrough
+	case Range:
+		fallthrough
+	case With:
+		return true
+
+	}
+
+	return false
+}
+
 var Subtypes = map[string]TokenSubtype{
 	"block":    Block,
-	"template": Template,
 	"define":   Define,
 	"break":    Break,
 	"continue": Continue,
+	"template": Template,
 	"else if":  ElseIf, // detect as seperate substype
 	"else":     Else,
 	"end":      End,
@@ -134,10 +157,15 @@ func (l *Lexer) emit(t TokenType) {
 		}
 	}
 
+	defer func() { l.start = l.pos }()
+
+	if t == TokenTemplate && subtype == End { // Skip ends in the AST
+		return
+	}
+
 	if t == TokenText {
 		// If the token start with spaces and when trimmed is empty, we skip this token.
 		if trimmed := strings.TrimLeftFunc(value, unicode.IsSpace); len(trimmed) == 0 {
-			l.start = l.pos
 			return
 		}
 		// If the token start with a newline we trimleft the value. We do add it to the list.
@@ -157,7 +185,6 @@ func (l *Lexer) emit(t TokenType) {
 	}
 
 	l.tokens = append(l.tokens, Token{Type: t, Value: value, Subtype: subtype})
-	l.start = l.pos
 }
 
 // lexText scans plain text until it encounters a template tag.
