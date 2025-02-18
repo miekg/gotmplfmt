@@ -44,8 +44,14 @@ func Pretty(w *W, n *Node, depth int) {
 
 	Render(w, n, depth, true)
 
-	for i := range n.List {
-		Pretty(w, n.List[i], depth+1)
+	for _, l := range n.List {
+		if l.Token.Type == TokenTemplate {
+			if l.Token.Subtype == Else || l.Token.Subtype == ElseIf {
+				Pretty(w, l, depth)
+				continue
+			}
+		}
+		Pretty(w, l, depth+1)
 	}
 
 	if Container(n.Token.Subtype) {
