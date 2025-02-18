@@ -159,10 +159,6 @@ func (l *Lexer) emit(t TokenType) {
 
 	defer func() { l.start = l.pos }()
 
-	if t == TokenTemplate && subtype == End { // Skip ends in the AST
-		return
-	}
-
 	if t == TokenText {
 		// If the token start with spaces and when trimmed is empty, we skip this token.
 		if trimmed := strings.TrimLeftFunc(value, unicode.IsSpace); len(trimmed) == 0 {

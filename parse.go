@@ -17,9 +17,9 @@ func (n *Node) parse(tokens []Token) []Token {
 
 	switch tokens[0].Subtype {
 	case End:
-		// Add to current list and then proceed to parse again a level higher.
-		n1 := &Node{Token: tokens[0], Parent: n}
-		n.List = append(n.List, n1)
+		// Add to current list and then proceed to parse again a level higher. But don't add the token itself.
+		// n1 := &Node{Token: tokens[0], Parent: n}
+		// 	n.List = append(n.List, n1)
 		return n.Parent.parse(tokens[1:])
 
 	case Define, If, ElseIf, Else, Block, Range, With:
