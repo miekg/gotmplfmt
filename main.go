@@ -64,6 +64,10 @@ func Render(w *W, n *Node, depth int, entering bool) {
 	w.Indent(d)
 
 	if !entering { // a container type is the only one that gets false here.
+		if n.Token.Type == TokenHTML {
+			fmt.Fprintln(w, "</"+n.Token.Value+">>>>")
+			return
+		}
 		// we don't know if it was
 		fmt.Fprintln(w, "{{end}}")
 		return

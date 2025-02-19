@@ -21,18 +21,24 @@ func (n *Node) parse(tokens []Token) []Token {
 		// n1 := &Node{Token: tokens[0], Parent: n}
 		// 	n.List = append(n.List, n1)
 		return n.Parent.parse(tokens[1:])
+	case TagClose:
+		// add close token too? Or just like end?
+		return n.Parent.parse(tokens[1:])
 
 	case Define, If, ElseIf, Else, Block, Range, With:
 		n1 := &Node{Token: tokens[0], Parent: n}
 		n.List = append(n.List, n1)
 		return n1.parse(tokens[1:])
 
-	default:
-		// also includes TokenText, by having a zero subtype
+	case TagOpen:
 		n1 := &Node{Token: tokens[0], Parent: n}
 		n.List = append(n.List, n1)
-		return n.parse(tokens[1:])
+		return n1.parse(tokens[1:])
 	}
+
+	n1 := &Node{Token: tokens[0], Parent: n}
+	n.List = append(n.List, n1)
+	return n.parse(tokens[1:])
 }
 
 // Parse parses tokens and returns to root node of the tree.

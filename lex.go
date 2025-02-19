@@ -37,6 +37,9 @@ const (
 	Range
 	With
 	End
+
+	TagOpen
+	TagClose
 )
 
 // Container returns true if the TokenSubType is a container type.
@@ -55,6 +58,8 @@ func Container(s TokenSubtype) bool {
 	case Range:
 		fallthrough
 	case With:
+		return true
+	case TagOpen:
 		return true
 	}
 	return false
@@ -160,7 +165,7 @@ func (l *Lexer) emit(t TokenType) {
 
 	defer func() { l.start = l.pos }()
 
-	if t == TokenText {
+	if t == TokenText || t == TokenHTML {
 		// If the token start with spaces and when trimmed is empty, we skip this token.
 		if trimmed := strings.TrimLeftFunc(value, unicode.IsSpace); len(trimmed) == 0 {
 			return
@@ -173,6 +178,17 @@ func (l *Lexer) emit(t TokenType) {
 		// If the remainder contains 1 newline, we trim the whitespace at the end too
 		if strings.Count(value, "\n") == 1 {
 			value = strings.TrimRightFunc(value, unicode.IsSpace)
+		}
+	}
+
+	if t == TokenHTML {
+		switch {
+		case strings.HasPrefix(value, "</"):
+			subtype = TagClose
+		case strings.HasSuffix(value, "/>"):
+			// none
+		case strings.HasPrefix(value, "<"):
+			subtype = TagOpen
 		}
 	}
 
