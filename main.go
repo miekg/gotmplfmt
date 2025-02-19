@@ -71,8 +71,12 @@ func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 	w.Indent(depth - 1)
 
 	if !entering { // a container type is the only one that gets false here.
-		l.Single = false // we use Println anyway here
+		l.Single = false // we use Println anyway here. TODO: next single tags, are put on multiple lines due to this...?
+
 		if n.Token.Type == TokenHTML {
+			if n.Token.Last { // is this is the last token, we don't need to write out the close tag - leave it open
+				return
+			}
 			fmt.Fprintln(w, EndTag(n.Token.Value))
 			return
 		}

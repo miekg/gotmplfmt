@@ -25,7 +25,7 @@ func (n *Node) parse(tokens []Token) []Token {
 		return n.Parent.parse(tokens[1:])
 	case TagClose:
 		if n.Token.Type == TokenText /* 0 */ && n.Token.Value == "" {
-			// Never seen an open for this tag
+			// Never seen an open for this tag, add to the tree, so it's outputted automatically.
 			n1 := &Node{Token: tokens[0], Parent: n}
 			n.List = append(n.List, n1)
 		}
