@@ -12,7 +12,7 @@ type TokenType int
 const (
 	TokenText     TokenType = iota // Contains plain text of html.
 	TokenTemplate                  // Contains template actions.
-	TokenSuper                     // Contains a setup of TokenText and non container TokenTemplates.
+	TokenHTML                      // Contains HTML tags.
 )
 
 // Token represents a token in the input text.
@@ -58,15 +58,6 @@ func Container(s TokenSubtype) bool {
 		return true
 	}
 	return false
-}
-
-// Super returns true if s can be added to a super token.
-func Super(s TokenSubtype) bool {
-	ok := Container(s)
-	if ok {
-		return false
-	}
-	return s == Pipe
 }
 
 var Subtypes = map[string]TokenSubtype{
@@ -118,23 +109,7 @@ func (l *Lexer) backup() { l.pos -= l.width }
 // Lex runs the lexer and returns the tokens. It also combines adjacent TokenTexts and non-container TokenTemplates.
 func (l *Lexer) Lex() []Token {
 	l.lexText()
-
-	tokens := []Token{}
-	super := Token{Type: TokenSuper}
-	for _, t := range l.tokens {
-		if t.Type == TokenTemplate && !Super(t.Subtype) {
-			if super.Value != "" {
-				tokens = append(tokens, super)
-				super = Token{Type: TokenSuper}
-			}
-
-			tokens = append(tokens, t)
-			continue
-		}
-
-		super.Value += t.Value
-	}
-	return tokens
+	return l.tokens
 }
 
 // next returns the next rune in the input.
@@ -224,6 +199,19 @@ func (l *Lexer) lexText() {
 			}
 			l.backup()
 		}
+		if r == '<' {
+			r2 := l.next()
+			if r2 == '/' || unicode.IsLetter(r2) {
+				l.backup()
+				l.backup()
+				if l.pos > l.start {
+					l.emit(TokenText)
+				}
+				l.lexHTML()
+				continue
+			}
+			l.backup()
+		}
 	}
 	if l.pos > l.start {
 		l.emit(TokenText)
@@ -246,6 +234,21 @@ func (l *Lexer) lexTemplate() {
 				break
 			}
 			l.backup()
+		}
+	}
+}
+
+// lexHTML scans an HTML tag.
+func (l *Lexer) lexHTML() {
+	l.next() // consume '<'
+	for {
+		r := l.next()
+		if r == -1 {
+			break
+		}
+		if r == '>' {
+			l.emit(TokenHTML)
+			break
 		}
 	}
 }
