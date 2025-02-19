@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 )
 
 var (
@@ -19,7 +18,6 @@ func main() {
 	lexer := NewLexer(string(buf))
 
 	tokens := lexer.Lex()
-	// Collapse multiple TokenTexts into one if there are no container elements in the middle
 
 	tree := Parse(tokens)
 	if *flagToken {
@@ -71,10 +69,5 @@ func Render(w *W, n *Node, depth int, entering bool) {
 		return
 	}
 
-	if n.Token.Type == TokenText && strings.Count(n.Token.Value, "\n") > 0 { // formatted multiline html
-		n.Token.Value = IndentString(n.Token.Value, d)
-	}
-
 	fmt.Fprintln(w, n.Token.Value)
-
 }

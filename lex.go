@@ -10,8 +10,9 @@ import (
 type TokenType int
 
 const (
-	TokenText TokenType = iota
-	TokenTemplate
+	TokenText     TokenType = iota // Contains plain text of html.
+	TokenTemplate                  // Contains template actions.
+	TokenSuper                     // Contains a setup of TokenText and non container TokenTemplates.
 )
 
 // Token represents a token in the input text.
@@ -38,7 +39,7 @@ const (
 	End
 )
 
-// Container returns true if the TokenSubType is a container type
+// Container returns true if the TokenSubType is a container type.
 func Container(s TokenSubtype) bool {
 	switch s {
 	case Block:
@@ -103,11 +104,30 @@ type Lexer struct {
 // NewLexer creates a new lexer for the given input.
 func NewLexer(input string) *Lexer { return &Lexer{input: input} }
 
-// Lex runs the lexer and returns the tokens.
-func (l *Lexer) Lex() []Token { l.lexText(); return l.tokens }
-
 // backup steps back one rune.
 func (l *Lexer) backup() { l.pos -= l.width }
+
+// Lex runs the lexer and returns the tokens. It also combines adjacent TokenTexts and non-container TokenTemplates.
+func (l *Lexer) Lex() []Token {
+	l.lexText()
+
+	tokens := []Token{}
+	super := Token{Type: TokenSuper}
+	for _, t := range l.tokens {
+		if t.Type == TokenTemplate && Container(t.Subtype) {
+			if super.Value != "" {
+				tokens = append(tokens, super)
+			}
+
+			super = Token{Type: TokenSuper}
+			tokens = append(tokens, t)
+			continue
+		}
+
+		super.Value += t.Value
+	}
+	return tokens
+}
 
 // next returns the next rune in the input.
 func (l *Lexer) next() rune {
@@ -129,6 +149,7 @@ func (l *Lexer) emit(t TokenType) {
 	// some for the end, internal whitespace is reduced to a single space. After this we are left with {{-<space>
 	// (anything else is reject by the go parser) or {{<space>thing, the later is reduced to {{thing. And again also
 	// at the end.
+	// TODO: for end tags save this info somewhere.
 	subtype := Pipe
 	if t == TokenTemplate {
 		value = strings.Join(strings.Fields(value), " ")

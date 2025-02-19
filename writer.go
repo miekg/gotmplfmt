@@ -29,12 +29,6 @@ func (w *W) Indent(depth int) error {
 		return nil
 	}
 	_, err := io.WriteString(w.w, strings.Repeat(indent, depth))
+	w.active = true
 	return err
-}
-
-// IndentBytes indents every line, except the first.
-func IndentString(s string, depth int) string {
-	in := strings.Repeat(indent, depth)
-	in = "\n" + in
-	return strings.Replace(s, "\n", in, -1)
 }
