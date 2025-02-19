@@ -31,40 +31,46 @@ func main() {
 	}
 
 	w := New(os.Stdout)
-	Pretty(w, tree, 0)
+	l := &Layout{}
+	l.Pretty(w, tree, 0)
 }
 
-func Pretty(w *W, n *Node, depth int) {
+type Layout struct {
+	Single bool // if true inhibit newlines
+}
+
+func (l *Layout) Pretty(w *W, n *Node, depth int) {
 	// The root token, depth = 0, does not contain anything, just the beginning of tree, skip it.
 	if n.Parent == nil {
 		for i := range n.List {
-			Pretty(w, n.List[i], depth+1)
+			l.Pretty(w, n.List[i], depth+1)
 		}
 		return
 	}
 
-	Render(w, n, depth, true)
+	l.Render(w, n, depth, true)
 
-	for _, l := range n.List {
-		if l.Token.Type == TokenTemplate {
-			if l.Token.Subtype == Else || l.Token.Subtype == ElseIf {
-				Pretty(w, l, depth)
+	for _, n := range n.List {
+		if n.Token.Type == TokenTemplate {
+			if n.Token.Subtype == Else || n.Token.Subtype == ElseIf {
+				l.Pretty(w, n, depth)
 				continue
 			}
 		}
-		Pretty(w, l, depth+1)
+		l.Pretty(w, n, depth+1)
 	}
 
 	if Container(n.Token.Subtype) {
-		Render(w, n, depth, false)
+		l.Render(w, n, depth, false)
 	}
 }
 
-func Render(w *W, n *Node, depth int, entering bool) {
+func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 	d := depth - 1
 	w.Indent(d)
 
 	if !entering { // a container type is the only one that gets false here.
+		l.Single = false // we use Println anyway here
 		if n.Token.Type == TokenHTML {
 			fmt.Fprintln(w, EndTag(n.Token.Value))
 			return
@@ -79,6 +85,18 @@ func Render(w *W, n *Node, depth int, entering bool) {
 		default:
 			fmt.Fprintln(w, "{{end}}")
 		}
+		return
+	}
+
+	// entering
+	if n.Token.Type == TokenHTML {
+		endtag := EndTag(n.Token.Value)
+		if _, ok := SingleLineTag[endtag]; ok {
+			l.Single = true
+		}
+	}
+	if l.Single {
+		fmt.Fprint(w, n.Token.Value)
 		return
 	}
 
@@ -105,4 +123,20 @@ func EndTag(s string) string {
 	}
 
 	return "</" + s1 + ">"
+}
+
+// SingleLineTag holds the tag that should be rendered on a single line. We use endtags here so we can (re)use EndTag.
+var SingleLineTag = map[string]struct{}{
+	"</h1>": struct{}{},
+	"</h2>": struct{}{},
+	"</h3>": struct{}{},
+	"</h4>": struct{}{},
+	"</h5>": struct{}{},
+	"</h6>": struct{}{},
+
+	"</a>":      struct{}{},
+	"</i>":      struct{}{},
+	"</b>":      struct{}{},
+	"</strike>": struct{}{},
+	"</mark>":   struct{}{},
 }
