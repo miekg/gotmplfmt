@@ -12,3 +12,5 @@ Fmt Go HTML templates. There are no options. The indenting used is 4 spaces.
 * Keep newlines, from the original, but squash them?
 * {{end}} is now printed, with knowing if it was {{- end -}} or the like.
 * Comment subtype.
+* HTML indenting (when implemented) does not know about the template indents and vice versa
+    We need to parse the html too when lexing the docs
