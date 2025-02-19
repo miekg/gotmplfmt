@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"unicode"
 )
 
 var (
@@ -65,7 +66,7 @@ func Render(w *W, n *Node, depth int, entering bool) {
 
 	if !entering { // a container type is the only one that gets false here.
 		if n.Token.Type == TokenHTML {
-			fmt.Fprintln(w, "</"+n.Token.Value+">>>>")
+			fmt.Fprintln(w, EndTag(n.Token.Value))
 			return
 		}
 		// we don't know if it was
@@ -74,4 +75,26 @@ func Render(w *W, n *Node, depth int, entering bool) {
 	}
 
 	fmt.Fprintln(w, n.Token.Value)
+}
+
+// EndTag takes an HTML tag and returns it as an end tag.
+func EndTag(s string) string {
+	s1 := ""
+	for _, r := range s {
+		if r == '<' {
+			continue
+		}
+		if r == '>' {
+			continue
+		}
+		if r == '/' {
+			continue
+		}
+		if unicode.IsSpace(r) {
+			break
+		}
+		s1 += string(r)
+	}
+
+	return "</" + s1 + ">"
 }
