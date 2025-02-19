@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"unicode"
 )
 
@@ -99,6 +100,10 @@ func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 		if _, ok := SingleLineTag[endtag]; ok {
 			l.Single = true
 		}
+		// Exception alert... a <script src ==... is also a one-liner
+		if strings.HasPrefix(n.Token.Value, "<script src") {
+			l.Single = true
+		}
 	}
 	if l.Single {
 		fmt.Fprint(w, n.Token.Value)
@@ -140,12 +145,13 @@ func EndTag(s string) string {
 
 // SingleLineTag holds the tag that should be rendered on a single line. We use endtags here so we can (re)use EndTag.
 var SingleLineTag = map[string]struct{}{
-	"</h1>": {},
-	"</h2>": {},
-	"</h3>": {},
-	"</h4>": {},
-	"</h5>": {},
-	"</h6>": {},
+	"</h1>":    {},
+	"</h2>":    {},
+	"</h3>":    {},
+	"</h4>":    {},
+	"</h5>":    {},
+	"</h6>":    {},
+	"</title>": {},
 
 	"</a>":      {},
 	"</i>":      {},
