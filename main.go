@@ -37,6 +37,7 @@ func main() {
 
 type Layout struct {
 	Single bool // if true inhibit newlines
+	Output bool // if true something has been written
 }
 
 func (l *Layout) Pretty(w *W, n *Node, depth int) {
@@ -66,8 +67,7 @@ func (l *Layout) Pretty(w *W, n *Node, depth int) {
 }
 
 func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
-	d := depth - 1
-	w.Indent(d)
+	w.Indent(depth - 1)
 
 	if !entering { // a container type is the only one that gets false here.
 		l.Single = false // we use Println anyway here
@@ -87,6 +87,11 @@ func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 		}
 		return
 	}
+	defer func() {
+		if depth-1 > 0 { // if 0 not even the indent would have been written
+			l.Output = true
+		}
+	}()
 
 	// entering
 	if n.Token.Type == TokenHTML {
@@ -98,6 +103,14 @@ func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 	if l.Single {
 		fmt.Fprint(w, n.Token.Value)
 		return
+	}
+
+	if n.Token.Type == TokenTemplate && l.Output == true {
+		switch n.Token.Subtype {
+		case Template, Define, Block:
+			fmt.Fprintln(w)
+			w.Indent(depth - 1)
+		}
 	}
 
 	fmt.Fprintln(w, n.Token.Value)
