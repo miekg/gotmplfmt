@@ -89,9 +89,7 @@ func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 		return
 	}
 	defer func() {
-		if depth-1 > 0 { // if 0 not even the indent would have been written
-			l.Output = true
-		}
+		l.Output = true
 	}()
 
 	// entering
