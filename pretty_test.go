@@ -22,29 +22,33 @@ func TestPretty(t *testing.T) {
 		if filepath.Ext(f.Name()) != ".tmpl" {
 			continue
 		}
-		buf, err := os.ReadFile(dir + "/" + f.Name())
-		if err != nil {
-			t.Errorf("Could not read %q: %s", dir+"/"+f.Name(), err)
-		}
-
 		prettyfile := dir + "/" + f.Name()[:len(f.Name())-4] + "pretty"
-		prettybuf, err := os.ReadFile(prettyfile)
-		if err != nil {
+		if _, err := os.ReadFile(prettyfile); err != nil {
 			continue
 		}
 
-		lexer := NewLexer(string(buf))
-		tokens := lexer.Lex()
-		tree := Parse(tokens)
+		t.Run(f.Name(), func(t *testing.T) {
+			buf, err := os.ReadFile(dir + "/" + f.Name())
+			if err != nil {
+				t.Errorf("Could not read %q: %s", dir+"/"+f.Name(), err)
+			}
 
-		b := &bytes.Buffer{}
-		w := New(b)
-		l := &Layout{}
-		l.Pretty(w, tree, 0)
+			prettyfile := dir + "/" + f.Name()[:len(f.Name())-4] + "pretty"
+			prettybuf, _ := os.ReadFile(prettyfile) // checked above
 
-		if diff := cmp.Diff(string(prettybuf), b.String()); diff != "" {
-			t.Errorf("TestPretty (%s) mismatch (-want +got):\n%s", f.Name(), diff)
-		}
+			lexer := NewLexer(string(buf))
+			tokens := lexer.Lex()
+			tree := Parse(tokens)
+
+			b := &bytes.Buffer{}
+			w := New(b)
+			l := &Layout{}
+			l.Pretty(w, tree, 0)
+
+			if diff := cmp.Diff(string(prettybuf), b.String()); diff != "" {
+				t.Errorf("TestPretty (%s) mismatch (-want +got):\n%s", f.Name(), diff)
+			}
+		})
 	}
 
 }

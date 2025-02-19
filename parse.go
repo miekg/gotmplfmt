@@ -24,6 +24,11 @@ func (n *Node) parse(tokens []Token) []Token {
 		n.MinusEnd = Minus(tokens[0].Value)
 		return n.Parent.parse(tokens[1:])
 	case TagClose:
+		if n.Token.Type == TokenText /* 0 */ && n.Token.Value == "" {
+			// Never seen an open for this tag
+			n1 := &Node{Token: tokens[0], Parent: n}
+			n.List = append(n.List, n1)
+		}
 		if n.Parent == nil { // can happen when we see just the close tag in the root of the node.
 			return n.parse(tokens[1:])
 		} else {
