@@ -69,8 +69,16 @@ func Render(w *W, n *Node, depth int, entering bool) {
 			fmt.Fprintln(w, EndTag(n.Token.Value))
 			return
 		}
-		// we don't know if it was
-		fmt.Fprintln(w, "{{end}}")
+		switch n.MinusEnd {
+		case MinusBoth:
+			fmt.Fprintln(w, "{{- end -}}")
+		case MinusLeft:
+			fmt.Fprintln(w, "{{- end}}")
+		case MinusRight:
+			fmt.Fprintln(w, "{{end -}}")
+		default:
+			fmt.Fprintln(w, "{{end}}")
+		}
 		return
 	}
 

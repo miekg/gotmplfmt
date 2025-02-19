@@ -137,7 +137,6 @@ func (l *Lexer) emit(t TokenType) {
 	// some for the end, internal whitespace is reduced to a single space. After this we are left with {{-<space>
 	// (anything else is reject by the go parser) or {{<space>thing, the later is reduced to {{thing. And again also
 	// at the end.
-	// TODO: for end tags save this info somewhere.
 	subtype := Pipe
 	if t == TokenTemplate {
 		value = strings.Join(strings.Fields(value), " ")

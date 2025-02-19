@@ -1,10 +1,13 @@
 package main
 
+import "strings"
+
 // Node is the parse tree of a template.
 type Node struct {
-	Token  Token
-	List   []*Node
-	Parent *Node
+	Token    Token
+	List     []*Node
+	Parent   *Node
+	MinusEnd int // did the {{end}} tag contain {{- or -}}
 }
 
 func NewNode(parent *Node) *Node { return &Node{Parent: parent} }
@@ -18,11 +21,9 @@ func (n *Node) parse(tokens []Token) []Token {
 	switch tokens[0].Subtype {
 	case End:
 		// Add to current list and then proceed to parse again a level higher. But don't add the token itself.
-		// n1 := &Node{Token: tokens[0], Parent: n}
-		// 	n.List = append(n.List, n1)
+		n.MinusEnd = Minus(tokens[0].Value)
 		return n.Parent.parse(tokens[1:])
 	case TagClose:
-		// add close token too? Or just like end?
 		return n.Parent.parse(tokens[1:])
 
 	case Define, If, ElseIf, Else, Block, Range, With:
@@ -47,4 +48,24 @@ func Parse(tokens []Token) *Node {
 	tree.parse(tokens)
 
 	return tree
+}
+
+const (
+	MinusNone = iota
+	MinusLeft
+	MinusRight
+	MinusBoth
+)
+
+func Minus(s string) int {
+	if strings.HasPrefix(s, "{{-") {
+		if strings.HasSuffix(s, "-}}") {
+			return MinusBoth
+		}
+		return MinusLeft
+	}
+	if strings.HasSuffix(s, "-}}") {
+		return MinusRight
+	}
+	return MinusNone
 }
