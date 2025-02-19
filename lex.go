@@ -57,8 +57,16 @@ func Container(s TokenSubtype) bool {
 	case With:
 		return true
 	}
-
 	return false
+}
+
+// Super returns true if s can be added to a super token.
+func Super(s TokenSubtype) bool {
+	ok := Container(s)
+	if ok {
+		return false
+	}
+	return s == Pipe
 }
 
 var Subtypes = map[string]TokenSubtype{
@@ -114,12 +122,12 @@ func (l *Lexer) Lex() []Token {
 	tokens := []Token{}
 	super := Token{Type: TokenSuper}
 	for _, t := range l.tokens {
-		if t.Type == TokenTemplate && Container(t.Subtype) {
+		if t.Type == TokenTemplate && !Super(t.Subtype) {
 			if super.Value != "" {
 				tokens = append(tokens, super)
+				super = Token{Type: TokenSuper}
 			}
 
-			super = Token{Type: TokenSuper}
 			tokens = append(tokens, t)
 			continue
 		}
