@@ -24,7 +24,11 @@ func (n *Node) parse(tokens []Token) []Token {
 		n.MinusEnd = Minus(tokens[0].Value)
 		return n.Parent.parse(tokens[1:])
 	case TagClose:
-		return n.Parent.parse(tokens[1:])
+		if n.Parent == nil { // can happen when we see just the close tag in the root of the node.
+			return n.parse(tokens[1:])
+		} else {
+			return n.Parent.parse(tokens[1:])
+		}
 
 	case Define, If, ElseIf, Else, Block, Range, With:
 		n1 := &Node{Token: tokens[0], Parent: n}
