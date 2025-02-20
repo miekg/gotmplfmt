@@ -8,6 +8,7 @@ import (
 
 var indent = "    "
 
+// W is a io.Writer that tracks if data has been written to the current  line.
 type W struct {
 	active bool // if true data has been written to the current line, including an indentation
 	w      io.Writer
