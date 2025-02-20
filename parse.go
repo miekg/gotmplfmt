@@ -10,8 +10,6 @@ type Node struct {
 	MinusEnd int // did the {{end}} tag contain {{- or -}}
 }
 
-func NewNode(parent *Node) *Node { return &Node{Parent: parent} }
-
 // Parse parses the tokens and adds them the list in n. It returns the token that are not yet consumed.
 func (n *Node) parse(tokens []Token) []Token {
 	if len(tokens) == 0 {
@@ -53,7 +51,7 @@ func (n *Node) parse(tokens []Token) []Token {
 
 // Parse parses tokens and returns to root node of the tree.
 func Parse(tokens []Token) *Node {
-	tree := NewNode(nil)
+	tree := &Node{}
 	tree.parse(tokens)
 
 	return tree

@@ -41,6 +41,7 @@ type Layout struct {
 	Output bool // if true something has been written
 }
 
+// Pretty walks the tree and formats the template.
 func (l *Layout) Pretty(w *W, n *Node, depth int) {
 	// The root token, depth = 0, does not contain anything, just the beginning of tree, skip it.
 	if n.Parent == nil {
@@ -67,8 +68,11 @@ func (l *Layout) Pretty(w *W, n *Node, depth int) {
 	}
 }
 
+// Render output a formatted token from the node  n.
 func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 	w.Indent(depth - 1)
+
+	// !entering
 
 	if !entering { // a container type is the only one that gets false here.
 		l.Single = false // we use Println anyway here. TODO: next single tags, are put on multiple lines due to this...?
@@ -92,17 +96,17 @@ func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 		}
 		return
 	}
-	defer func() {
-		l.Output = true
-	}()
+
+	defer func() { l.Output = true }()
 
 	// entering
+
 	if n.Token.Type == TokenHTML {
 		endtag := EndTag(n.Token.Value)
 		if _, ok := SingleLineTag[endtag]; ok {
 			l.Single = true
 		}
-		// Exception alert... a <script src ==... is also a one-liner
+		// Exception alert... a <script src ==... is also a one-liner.
 		if strings.HasPrefix(n.Token.Value, "<script src") {
 			l.Single = true
 		}
@@ -145,7 +149,7 @@ func EndTag(s string) string {
 	return "</" + s1 + ">"
 }
 
-// SingleLineTag holds the tag that should be rendered on a single line. We use endtags here so we can (re)use EndTag.
+// SingleLineTag holds the tags that should be rendered on a single line. We use endtags here so we can (re)use EndTag.
 var SingleLineTag = map[string]struct{}{
 	"</h1>":    {},
 	"</h2>":    {},

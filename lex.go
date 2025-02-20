@@ -96,8 +96,6 @@ var sublist = []string{
 	"with",
 }
 
-// order list of subtypes
-
 // Lexer holds the state of the lexer.
 type Lexer struct {
 	input  string
@@ -113,11 +111,11 @@ func NewLexer(input string) *Lexer { return &Lexer{input: input} }
 // backup steps back one rune.
 func (l *Lexer) backup() { l.pos -= l.width }
 
-// Lex runs the lexer and returns the tokens. It also combines adjacent TokenTexts and non-container TokenTemplates.
+// Lex runs the lexer and returns the tokens.
 func (l *Lexer) Lex() []Token {
 	l.lexText()
 	tokens := l.tokens
-	tokens[len(tokens)-1].Last = true
+	tokens[len(tokens)-1].Last = true // TODO(miek): remove this hack
 	return tokens
 }
 
@@ -138,7 +136,7 @@ func (l *Lexer) emit(t TokenType) {
 	value := l.input[l.start:l.pos]
 
 	// some cleanup TokenTemplates, {{<space>thing is reduced to {{thing, execpt for {{-, then it is {{- thing.
-	// some for the end, internal whitespace is reduced to a single space. After this we are left with {{-<space>
+	// Same for the end, internal whitespace is reduced to a single space. After this we are left with {{-<space>
 	// (anything else is reject by the go parser) or {{<space>thing, the later is reduced to {{thing. And again also
 	// at the end.
 	subtype := Pipe
@@ -177,8 +175,7 @@ func (l *Lexer) emit(t TokenType) {
 		if strings.HasPrefix(value, "\n") {
 			value = strings.TrimLeftFunc(value, unicode.IsSpace)
 		}
-
-		// If the remainder contains 1 newline, we trim the whitespace at the end too
+		// If the remainder contains 1 newline, we trim the whitespace at the end too.
 		if strings.Count(value, "\n") == 1 {
 			value = strings.TrimRightFunc(value, unicode.IsSpace)
 		}
@@ -198,7 +195,7 @@ func (l *Lexer) emit(t TokenType) {
 	l.tokens = append(l.tokens, Token{Type: t, Value: value, Subtype: subtype})
 }
 
-// lexText scans plain text until it encounters a template tag.
+// lexText scans plain text until it encounters a template or html tag.
 func (l *Lexer) lexText() {
 	for {
 		r := l.next()
