@@ -142,6 +142,8 @@ var SingleLineTag = map[string]struct{}{
 	"strike": {},
 	"strong": {},
 	"mark":   {},
+	"label":  {},
+	"span":   {},
 	"ins":    {},
 	"del":    {},
 	"small":  {},
