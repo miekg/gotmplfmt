@@ -52,7 +52,10 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 
 		if n.Token.Type == TokenHTML {
 			// bail out as we dont wont to synthesis close tags as these might be left open on purpose, especially in partials.
-			fmt.Fprintln(w)
+			htmltag := tag(n.Token.Value)
+			if _, ok := SingleLineTag[htmltag]; ok {
+				fmt.Fprintln(w)
+			}
 			return
 		}
 		w.Indent(depth - 1) // TODO(miek): can we get a away with setting the end after the html token check...
