@@ -70,18 +70,16 @@ func (l *Layout) Pretty(w *W, n *Node, depth int) {
 
 // Render output a formatted token from the node  n.
 func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
-	w.Indent(depth - 1)
-
 	// !entering
-
 	if !entering { // a container type is the only one that gets false here.
-		l.Single = false // we use Println anyway here. TODO: next single tags, are put on multiple lines due to this...?
+
+		w.Indent(depth - 1)
+
+		l.Single = false // we use Println anyway here.
 
 		if n.Token.Type == TokenHTML {
-			if n.Token.Last { // is this is the last token, we don't need to write out the close tag - leave it open
-				return
-			}
-			fmt.Fprintln(w, EndTag(n.Token.Value))
+			// bail out as we dont wont to synthesis close tags as these might be left open on purpose,
+			// especially in partials.
 			return
 		}
 		switch n.MinusEnd {
@@ -97,16 +95,23 @@ func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 		return
 	}
 
+	// entering
 	defer func() { l.Output = true }()
 
-	// entering
+	// Even though we're entering, we get the end tag of an html element here as well, because we add them to the
+	// AST before we close the block. So we need to indent one-less to put these on the right level.
+	if n.Token.Type == TokenHTML && n.Token.Subtype == TagClose {
+		w.Indent(depth - 2)
+	} else {
+		w.Indent(depth - 1)
+	}
 
 	if n.Token.Type == TokenHTML {
-		endtag := EndTag(n.Token.Value)
-		if _, ok := SingleLineTag[endtag]; ok {
+		htmltag := tag(n.Token.Value)
+		if _, ok := SingleLineTag[htmltag]; ok {
 			l.Single = true
 		}
-		// Exception alert... a <script src ==... is also a one-liner.
+		// Exception alert... a <script src... is also a one-liner.
 		if strings.HasPrefix(n.Token.Value, "<script src") {
 			l.Single = true
 		}
@@ -127,8 +132,8 @@ func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
 	fmt.Fprintln(w, n.Token.Value)
 }
 
-// EndTag takes an HTML tag and returns it as an end tag.
-func EndTag(s string) string {
+// tag takes an HTML elements and returns the tag.
+func tag(s string) string {
 	s1 := ""
 	for _, r := range s {
 		if r == '<' {
@@ -146,32 +151,32 @@ func EndTag(s string) string {
 		s1 += string(r)
 	}
 
-	return "</" + s1 + ">"
+	return s1
 }
 
-// SingleLineTag holds the tags that should be rendered on a single line. We use endtags here so we can (re)use EndTag.
+// SingleLineTag holds the tags that should be rendered on a single line.
 var SingleLineTag = map[string]struct{}{
-	"</h1>":    {},
-	"</h2>":    {},
-	"</h3>":    {},
-	"</h4>":    {},
-	"</h5>":    {},
-	"</h6>":    {},
-	"</title>": {},
+	"<h1>":    {},
+	"<h2>":    {},
+	"<h3>":    {},
+	"<h4>":    {},
+	"<h5>":    {},
+	"<h6>":    {},
+	"<title>": {},
 
-	"</a>":      {},
-	"</i>":      {},
-	"</u>":      {},
-	"</b>":      {},
-	"</tt>":     {},
-	"</em>":     {},
-	"</strike>": {},
-	"</strong>": {},
-	"</mark>":   {},
-	"</ins>":    {},
-	"</del>":    {},
-	"</small>":  {},
-	"</big>":    {},
-	"</sub>":    {},
-	"</sup>":    {},
+	"<a>":      {},
+	"<i>":      {},
+	"<u>":      {},
+	"<b>":      {},
+	"<tt>":     {},
+	"<em>":     {},
+	"<strike>": {},
+	"<strong>": {},
+	"<mark>":   {},
+	"<ins>":    {},
+	"<del>":    {},
+	"<small>":  {},
+	"<big>":    {},
+	"<sub>":    {},
+	"<sup>":    {},
 }

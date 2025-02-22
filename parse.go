@@ -19,14 +19,12 @@ func (n *Node) parse(tokens []Token) []Token {
 	switch tokens[0].Subtype {
 	case End:
 		// Add to current list and then proceed to parse again a level higher. But don't add the token itself.
-		n.MinusEnd = Minus(tokens[0].Value)
+		n.MinusEnd = minus(tokens[0].Value)
 		return n.Parent.parse(tokens[1:])
 	case TagClose:
-		if n.Token.Type == TokenText /* 0 */ && n.Token.Value == "" {
-			// Never seen an open for this tag, add to the tree, so it's outputted automatically.
-			n1 := &Node{Token: tokens[0], Parent: n}
-			n.List = append(n.List, n1)
-		}
+		n1 := &Node{Token: tokens[0], Parent: n}
+		n.List = append(n.List, n1)
+
 		if n.Parent == nil { // can happen when we see just the close tag in the root of the node.
 			return n.parse(tokens[1:])
 		} else {
@@ -64,7 +62,7 @@ const (
 	MinusBoth
 )
 
-func Minus(s string) int {
+func minus(s string) int {
 	if strings.HasPrefix(s, "{{-") {
 		if strings.HasSuffix(s, "-}}") {
 			return MinusBoth

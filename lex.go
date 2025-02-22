@@ -20,8 +20,6 @@ type Token struct {
 	Type    TokenType
 	Subtype TokenSubtype // If the token is a TokenTemplate, this holds the keyword.
 	Value   string
-
-	Last bool // When true this is the last token. This is used to _not_ close open tags (that need to stay open).
 }
 
 type TokenSubtype int
@@ -115,7 +113,6 @@ func (l *Lexer) backup() { l.pos -= l.width }
 func (l *Lexer) Lex() []Token {
 	l.lexText()
 	tokens := l.tokens
-	tokens[len(tokens)-1].Last = true // TODO(miek): remove this hack
 	return tokens
 }
 
