@@ -42,8 +42,7 @@ func TestPretty(t *testing.T) {
 
 			b := &bytes.Buffer{}
 			w := New(b)
-			l := &Layout{}
-			l.Pretty(w, tree, 0)
+			Pretty(w, tree, 0)
 
 			if diff := cmp.Diff(string(prettybuf), b.String()); diff != "" {
 				t.Errorf("TestPretty (%s) mismatch (-want +got):\n%s", f.Name(), diff)
