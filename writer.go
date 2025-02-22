@@ -26,7 +26,7 @@ func (w *W) Write(data []byte) (int, error) {
 
 // Indent writes an indent to the underlaying writer, but only if we haven't seen a something written yet.
 func (w *W) Indent(depth int) error {
-	if w.active {
+	if w.active || depth < 0 {
 		return nil
 	}
 	_, err := io.WriteString(w.w, strings.Repeat(indent, depth))

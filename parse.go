@@ -7,7 +7,8 @@ type Node struct {
 	Token    Token
 	List     []*Node
 	Parent   *Node
-	MinusEnd int // did the {{end}} tag contain {{- or -}}
+	MinusEnd int  // did the {{end}} tag contain {{- or -}}
+	Last     bool // This is the last node
 }
 
 // Parse parses the tokens and adds them the list in n. It returns the token that are not yet consumed.

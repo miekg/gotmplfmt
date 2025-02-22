@@ -22,6 +22,7 @@ type Token struct {
 	Value   string
 }
 
+// TokenSubtype describe the deeper type of a token, like what kind of template action or if that html is an open tag or not.
 type TokenSubtype int
 
 const (

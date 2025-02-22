@@ -6,19 +6,19 @@ import (
 	"unicode"
 )
 
-type Layout struct {
+type layout struct {
 	Single bool // if true inhibit newlines
 	Output bool // if true something has been written
 }
 
 // Pretty walks the tree and formats the template.
 func Pretty(w *W, n *Node, depth int) {
-	l := &Layout{}
+	l := &layout{}
 	l.pretty(w, n, depth)
 }
 
 // Pretty walks the tree and formats the template.
-func (l *Layout) pretty(w *W, n *Node, depth int) {
+func (l *layout) pretty(w *W, n *Node, depth int) {
 	// The root token, depth = 0, does not contain anything, just the beginning of tree, skip it.
 	if n.Parent == nil {
 		for i := range n.List {
@@ -45,18 +45,17 @@ func (l *Layout) pretty(w *W, n *Node, depth int) {
 }
 
 // Render output a formatted token from the node  n.
-func (l *Layout) Render(w *W, n *Node, depth int, entering bool) {
+func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 	// !entering
 	if !entering { // a container type is the only one that gets false here.
-
-		w.Indent(depth - 1)
 		l.Single = false // we use Println anyway here.
 
 		if n.Token.Type == TokenHTML {
-			// bail out as we dont wont to synthesis close tags as these might be left open on purpose,
-			// especially in partials.
+			// bail out as we dont wont to synthesis close tags as these might be left open on purpose, especially in partials.
+			fmt.Fprintln(w)
 			return
 		}
+		w.Indent(depth - 1) // TODO(miek): can we get a away with setting the end after the html token check...
 		switch n.MinusEnd {
 		case MinusBoth:
 			fmt.Fprintln(w, "{{- end -}}")
@@ -123,27 +122,27 @@ func tag(s string) (s1 string) {
 
 // SingleLineTag holds the tags that should be rendered on a single line.
 var SingleLineTag = map[string]struct{}{
-	"<h1>":    {},
-	"<h2>":    {},
-	"<h3>":    {},
-	"<h4>":    {},
-	"<h5>":    {},
-	"<h6>":    {},
-	"<title>": {},
+	"h1":    {},
+	"h2":    {},
+	"h3":    {},
+	"h4":    {},
+	"h5":    {},
+	"h6":    {},
+	"title": {},
 
-	"<a>":      {},
-	"<i>":      {},
-	"<u>":      {},
-	"<b>":      {},
-	"<tt>":     {},
-	"<em>":     {},
-	"<strike>": {},
-	"<strong>": {},
-	"<mark>":   {},
-	"<ins>":    {},
-	"<del>":    {},
-	"<small>":  {},
-	"<big>":    {},
-	"<sub>":    {},
-	"<sup>":    {},
+	"a":      {},
+	"i":      {},
+	"u":      {},
+	"b":      {},
+	"tt":     {},
+	"em":     {},
+	"strike": {},
+	"strong": {},
+	"mark":   {},
+	"ins":    {},
+	"del":    {},
+	"small":  {},
+	"big":    {},
+	"sub":    {},
+	"sup":    {},
 }
