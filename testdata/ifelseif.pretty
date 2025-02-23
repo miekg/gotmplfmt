@@ -1,0 +1,9 @@
+{{if .Bla}}
+    boe
+{{else if .S1}}
+    blaa
+{{else if .S2}}
+    blaa
+{{end}}
+</main>
+</body>

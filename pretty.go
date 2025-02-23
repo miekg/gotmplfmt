@@ -89,7 +89,7 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 			l.Single = true
 		}
 		// Exception alert... a <script src... is also a one-liner.
-		if strings.HasPrefix(n.Token.Value, "<script src") {
+		if strings.HasPrefix(n.Token.Value, "<script") && strings.Contains(n.Token.Value, "src=") {
 			l.Single = true
 		}
 	}

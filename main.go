@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 var (
@@ -31,4 +32,23 @@ func main() {
 
 	w := New(os.Stdout)
 	Pretty(w, tree, 0)
+
+	if *flagDebug {
+		structure(tree, 0)
+	}
+}
+
+func structure(n *Node, depth int) {
+	if n.Parent == nil {
+		for i := range n.List {
+			structure(n.List[i], depth+1)
+		}
+		return
+	}
+
+	fmt.Printf("[%s] List %d token: %q \t\t(parent: %q)\n", strings.Repeat(" ", depth), len(n.List), n.Token.Value, n.Parent.Token.Value)
+
+	for _, n := range n.List {
+		structure(n, depth+1)
+	}
 }

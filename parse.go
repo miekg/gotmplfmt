@@ -7,8 +7,7 @@ type Node struct {
 	Token    Token
 	List     []*Node
 	Parent   *Node
-	MinusEnd int  // did the {{end}} tag contain {{- or -}}
-	Last     bool // This is the last node
+	MinusEnd int // did the {{end}} tag contain {{- or -}}
 }
 
 // Parse parses the tokens and adds them the list in n. It returns the token that are not yet consumed.
@@ -21,7 +20,20 @@ func (n *Node) parse(tokens []Token) []Token {
 	case End:
 		// Add to current list and then proceed to parse again a level higher. But don't add the token itself.
 		n.MinusEnd = minus(tokens[0].Value)
-		return n.Parent.parse(tokens[1:])
+		// a single end can close a chain of else ifs, we need to find the ultimate if parent here
+		parent := n.Parent
+		for parent != nil {
+			if parent.Token.Subtype != Else && parent.Token.Subtype != ElseIf && parent.Token.Subtype != If {
+				break
+			}
+			parent = parent.Parent
+		}
+		if parent == nil {
+			return n.parse(tokens[1:])
+		} else {
+			return parent.parse(tokens[1:])
+		}
+
 	case TagClose:
 		n1 := &Node{Token: tokens[0], Parent: n}
 		n.List = append(n.List, n1)
