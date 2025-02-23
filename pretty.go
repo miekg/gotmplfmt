@@ -47,18 +47,17 @@ func (l *layout) pretty(w *W, n *Node, depth int) {
 // Render output a formatted token from the node  n.
 func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 	// !entering
-	if !entering { // a container type is the only one that gets false here.
+	if !entering {
 		l.Single = false // we use Println anyway here.
 
 		if n.Token.Type == TokenHTML {
-			// bail out as we dont wont to synthesis close tags as these might be left open on purpose, especially in partials.
 			htmltag := tag(n.Token.Value)
 			if _, ok := SingleLineTag[htmltag]; ok {
 				fmt.Fprintln(w)
 			}
 			return
 		}
-		w.Indent(depth - 1) // TODO(miek): can we get a away with setting the end after the html token check...
+		w.Indent(depth - 1)
 		switch n.MinusEnd {
 		case MinusBoth:
 			fmt.Fprintln(w, "{{- end -}}")
@@ -94,10 +93,18 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 		}
 	}
 	if l.Single {
+		// range and with always start on a new line. If l.Single is true we are quaranteed that we printed some
+		// html, so in that case we can just insert a newline
+		if n.Token.Subtype == Range || n.Token.Subtype == With {
+			fmt.Fprintln(w)
+			w.Indent(depth - 1)
+			l.Single = false
+		}
 		fmt.Fprint(w, n.Token.Value)
 		return
 	}
 
+	// Empty line before these, but only when we've seen something be outputted.
 	if n.Token.Type == TokenTemplate && l.Output == true {
 		switch n.Token.Subtype {
 		case Template, Define, Block:
