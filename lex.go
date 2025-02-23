@@ -32,7 +32,6 @@ const (
 	Template
 	Break
 	Continue
-	ElseIf
 	Else
 	If
 	Range
@@ -72,27 +71,11 @@ var Subtypes = map[string]TokenSubtype{
 	"break":    Break,
 	"continue": Continue,
 	"template": Template,
-	"else if":  ElseIf, // detect as seperate substype
-	"else":     Else,
+	"else":     Else, // 'else with' and 'else if' fall in this category
 	"end":      End,
 	"if":       If,
 	"range":    Range,
 	"with":     With,
-}
-
-// odererd list of keyword, so we are sure 'else if' becomes before 'else'
-var sublist = []string{
-	"block",
-	"template",
-	"define",
-	"break",
-	"continue",
-	"else if",
-	"else",
-	"end",
-	"if",
-	"range",
-	"with",
 }
 
 // Lexer holds the state of the lexer.
@@ -149,7 +132,7 @@ func (l *Lexer) emit(t TokenType) {
 		}
 		// beginning is now {{ or {{-, check if we can extract the subtype
 	Loop:
-		for _, s := range sublist {
+		for s := range Subtypes {
 			switch {
 			case strings.HasPrefix(value, "{{"+s):
 				subtype = Subtypes[s]

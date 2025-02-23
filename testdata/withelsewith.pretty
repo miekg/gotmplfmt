@@ -1,0 +1,9 @@
+{{with .Bla}}
+    boe
+{{else with .S1}}
+    blaa
+{{else with .S2}}
+    blaa
+{{end}}
+</main>
+</body>

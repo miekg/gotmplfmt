@@ -31,7 +31,7 @@ func (l *layout) pretty(w *W, n *Node, depth int) {
 
 	for _, n := range n.List {
 		if n.Token.Type == TokenTemplate {
-			if n.Token.Subtype == Else || n.Token.Subtype == ElseIf {
+			if n.Token.Subtype == Else {
 				l.pretty(w, n, depth)
 				continue
 			}
