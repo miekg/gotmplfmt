@@ -10,7 +10,7 @@ import (
 type TokenType int
 
 const (
-	TokenText     TokenType = iota // Contains anything not TokenTemplate or TokenHTML.
+	TokenText     TokenType = iota // Contains plain text of html.
 	TokenTemplate                  // Contains template actions.
 	TokenHTML                      // Contains HTML tags.
 )
@@ -22,7 +22,7 @@ type Token struct {
 	Value   string
 }
 
-// TokenSubtype describes the deeper type of a token, like what kind of template action or if that html is an open tag or not.
+// TokenSubtype describe the deeper type of a token, like what kind of template action or if that html is an open tag or not.
 type TokenSubtype int
 
 const (
@@ -40,11 +40,9 @@ const (
 
 	TagOpen
 	TagClose
-
-	EmptyLine
 )
 
-// Container returns true if the TokenSubtype is a container type.
+// Container returns true if the TokenSubType is a container type.
 func Container(s TokenSubtype) bool {
 	switch s {
 	case Block:
@@ -148,11 +146,8 @@ func (l *Lexer) emit(t TokenType) {
 	defer func() { l.start = l.pos }()
 
 	if t == TokenText || t == TokenHTML {
-		// If the token start with spaces and when trimmed is empty, we skip this token. If its a newline we _do_ add it.
+		// If the token start with spaces and when trimmed is empty, we skip this token.
 		if trimmed := strings.TrimLeftFunc(value, unicode.IsSpace); len(trimmed) == 0 {
-			if t == TokenText && strings.Count(value, "\n") > 1 {
-				l.tokens = append(l.tokens, Token{Type: t, Value: "", Subtype: EmptyLine}) // normalize to empty string, newlines will be added anyway.
-			}
 			return
 		}
 		// If the token start with a newline we trimleft the value. We do add it to the list.
