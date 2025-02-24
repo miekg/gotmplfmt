@@ -1,6 +1,7 @@
 # gotmplfmt
 
-Fmt Go HTML templates. There are no options. The indenting used is 4 spaces.
+Fmt Go HTML templates. There are no options. The indenting used is 1 tab - this allow your
+terminal's tab width setting to do its work.
 
 ## Usage
 

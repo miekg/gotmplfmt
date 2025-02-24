@@ -1,6 +1,6 @@
 <body>
-    <fieldset>
-        {{bla}}
-    </fieldset>
-    <main class="container">
-        <article>
+	<fieldset>
+		{{bla}}
+	</fieldset>
+	<main class="container">
+		<article>

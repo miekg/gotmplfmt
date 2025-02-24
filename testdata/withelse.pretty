@@ -1,6 +1,6 @@
 {{with .Params.Author}}
-    <span>{{.}}</span>
+	<span>{{.}}</span>
 {{else}}
-    <span>xx</span>
+	<span>xx</span>
 {{end}}
 </div>
