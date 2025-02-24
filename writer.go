@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var indent = "    "
+var indent = "\t"
 
 // W is a io.Writer that tracks if data has been written to the current line.
 type W struct {

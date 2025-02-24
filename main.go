@@ -27,7 +27,7 @@ func main() {
 		}
 	}
 	if *flagDebug {
-		indent = "   +"
+		indent += "+"
 	}
 
 	w := New(os.Stdout)

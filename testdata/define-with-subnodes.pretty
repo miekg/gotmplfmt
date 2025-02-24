@@ -1,7 +1,7 @@
 {{define "jpeo"}}
-    {{- if .Flash}}
-         Bla
-    {{else}}
-        bloep 
-    {{end}}
+	{{- if .Flash}}
+		 Bla
+	{{else}}
+		bloep 
+	{{end}}
 {{end}}

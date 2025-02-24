@@ -1,9 +1,9 @@
 {{with .Bla}}
-    boe
+	boe
 {{else with .S1}}
-    blaa
+	blaa
 {{else with .S2}}
-    blaa
+	blaa
 {{end}}
 </main>
 </body>
