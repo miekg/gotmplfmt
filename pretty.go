@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"unicode"
 )
 
@@ -85,10 +84,6 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 	if n.Token.Type == TokenHTML {
 		htmltag := tag(n.Token.Value)
 		if _, ok := SingleLineTag[htmltag]; ok {
-			l.Single = true
-		}
-		// Exception alert... a <script src... is also a one-liner.
-		if strings.HasPrefix(n.Token.Value, "<script") && strings.Contains(n.Token.Value, "src=") {
 			l.Single = true
 		}
 	}
