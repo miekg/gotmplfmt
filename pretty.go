@@ -47,7 +47,7 @@ func (l *layout) pretty(w *W, n *Node, depth int) {
 func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 	// !entering
 	if !entering {
-		l.Single = false // we use Println anyway here.
+		defer func() { l.Single = false }() // we use Println anyway here.
 
 		if n.Token.Type == TokenHTML {
 			htmltag := tag(n.Token.Value)
@@ -55,6 +55,9 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 				fmt.Fprintln(w)
 			}
 			return
+		}
+		if l.Single {
+			fmt.Fprintln(w)
 		}
 		w.Indent(depth - 1)
 		switch n.MinusEnd {

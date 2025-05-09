@@ -58,7 +58,6 @@ func (n *Node) parse(tokens []Token) []Token {
 		return n1.parse(tokens[1:])
 	}
 
-	println("VALUE:", tokens[0].Type, tokens[0].Value)
 	n1 := &Node{Token: tokens[0], Parent: n}
 	n.List = append(n.List, n1)
 	return n.parse(tokens[1:])
