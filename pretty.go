@@ -47,7 +47,7 @@ func (l *layout) pretty(w *W, n *Node, depth int) {
 func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 	// !entering
 	if !entering {
-		l.Single = false // we use Println anyway here.
+		defer func() { l.Single = false }() // we use Println anyway here.
 
 		if n.Token.Type == TokenHTML {
 			htmltag := tag(n.Token.Value)
@@ -55,6 +55,9 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 				fmt.Fprintln(w)
 			}
 			return
+		}
+		if l.Single {
+			fmt.Fprintln(w)
 		}
 		w.Indent(depth - 1)
 		switch n.MinusEnd {
@@ -125,31 +128,29 @@ func tag(s string) (s1 string) {
 	return s1
 }
 
-// SingleLineTag holds the tags that should be rendered on a single line.
+// SingleLineTag holds the tags that should be rendered on a single line. This is the set of inline
+// tags in html.
 var SingleLineTag = map[string]struct{}{
-	"h1":    {},
-	"h2":    {},
-	"h3":    {},
-	"h4":    {},
-	"h5":    {},
-	"h6":    {},
-	"title": {},
-
-	"a":      {},
-	"i":      {},
-	"u":      {},
-	"b":      {},
-	"tt":     {},
-	"em":     {},
-	"strike": {},
-	"strong": {},
-	"mark":   {},
-	"label":  {},
-	"span":   {},
-	"ins":    {},
-	"del":    {},
-	"small":  {},
-	"big":    {},
-	"sub":    {},
-	"sup":    {},
+	"a":        {},
+	"i":        {},
+	"u":        {},
+	"b":        {},
+	"br":       {},
+	"tt":       {},
+	"em":       {},
+	"img":      {},
+	"font":     {},
+	"textarea": {},
+	"input":    {},
+	"strike":   {},
+	"strong":   {},
+	"mark":     {},
+	"label":    {},
+	"span":     {},
+	"ins":      {},
+	"del":      {},
+	"small":    {},
+	"big":      {},
+	"sub":      {},
+	"sup":      {},
 }
