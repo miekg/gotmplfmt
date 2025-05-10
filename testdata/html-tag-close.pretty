@@ -1,0 +1,7 @@
+{{define "login/card-science.tmpl"}}
+	<form hx-post="/-/login">
+		<details id="science-details">
+			<input type="submit" class="outline" hx-post="/-/login" value="Log in"/>
+		</details>
+	</form>
+{{end}}

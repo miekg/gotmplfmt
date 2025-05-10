@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"strings"
 )
@@ -32,4 +33,13 @@ func (w *W) Indent(depth int) error {
 	_, err := io.WriteString(w.w, strings.Repeat(indent, depth))
 	w.active = true
 	return err
+}
+
+// Ln writes a newline, but only if the line is active.
+func (w *W) Ln() {
+	if !w.active {
+		return
+	}
+	fmt.Fprintln(w.w)
+	w.active = false
 }
