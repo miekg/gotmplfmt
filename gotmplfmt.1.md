@@ -18,10 +18,14 @@ gotmplfmt - format Go HTML template files
 
 The zone is formatted according to the following rules:
 
-- rule1
+- tabs are used for indentation
+- the structure of open HTML tags and template verbs is followed
 
-No semantic checks are done, this is purely text manipulation with some basic zone file syntax
-understanding.
+For partial template effort is made to do the right thing, but as these can contain non-closed tags and
+open if-then-else chains the result is not always what you expect.
+
+Note: you _can_ use this on Go text templates, but as whitespace is significant there, it will lead
+to "corrupt" output.
 
 # OPTIONS
 
