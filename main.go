@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 )
@@ -15,9 +16,27 @@ var (
 
 func main() {
 	flag.Parse()
-	buf, _ := io.ReadAll(os.Stdin)
-	lexer := NewLexer(string(buf))
 
+	if flag.NArg() == 0 {
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			log.Fatalf("gotmplfmt: %s", err)
+		}
+		Reformat(data)
+		return
+	}
+
+	for _, a := range flag.Args() {
+		data, err := os.ReadFile(a)
+		if err != nil {
+			log.Fatalf("gotmplfmt: %s", err)
+		}
+		Reformat(data)
+	}
+}
+
+func Reformat(data []byte) {
+	lexer := NewLexer(string(data))
 	tokens := lexer.Lex()
 
 	tree := Parse(tokens)
