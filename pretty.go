@@ -47,7 +47,7 @@ func (l *layout) pretty(w *W, n *Node, depth int) {
 func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 	// !entering
 	if !entering {
-		defer func() { l.Single = false }() // we use Println anyway here.
+		defer func() { l.Single = false }()
 
 		if n.Token.Type == TokenHTML {
 			htmltag := tag(n.Token.Value)
@@ -100,15 +100,6 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 		}
 		fmt.Fprint(w, n.Token.Value)
 		return
-	}
-
-	// Empty line before these, but only when we've seen something be outputted.
-	if n.Token.Type == TokenTemplate && l.Output == true {
-		switch n.Token.Subtype {
-		case Template, Define, Block:
-			fmt.Fprintln(w)
-			w.Indent(depth - 1)
-		}
 	}
 
 	fmt.Fprintln(w, n.Token.Value)
