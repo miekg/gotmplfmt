@@ -1,5 +1,4 @@
 {{template "head.tmpl" .}}
-
 {{template "header.tmpl" .}}
 <hgroup>
 </hgroup>

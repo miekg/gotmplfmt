@@ -50,8 +50,7 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 		defer func() { l.Single = false }()
 
 		if n.Token.Type == TokenHTML {
-			htmltag := tag(n.Token.Value)
-			if _, ok := SingleLineTag[htmltag]; ok {
+			if IsSingle(n.Token) {
 				fmt.Fprintln(w)
 			}
 			return
@@ -79,14 +78,16 @@ func (l *layout) Render(w *W, n *Node, depth int, entering bool) {
 	// Even though we're entering, we get the end tag of an html element here as well, because we add them to the
 	// AST before we close the block. So we need to indent one-less to put these on the right level.
 	if n.Token.Type == TokenHTML && n.Token.Subtype == TagClose {
+		if !IsSingle(n.Token) {
+			w.Ln()
+		}
 		w.Indent(depth - 2)
 	} else {
 		w.Indent(depth - 1)
 	}
 
 	if n.Token.Type == TokenHTML {
-		htmltag := tag(n.Token.Value)
-		if _, ok := SingleLineTag[htmltag]; ok {
+		if IsSingle(n.Token) {
 			l.Single = true
 		}
 	}
@@ -144,4 +145,10 @@ var SingleLineTag = map[string]struct{}{
 	"big":      {},
 	"sub":      {},
 	"sup":      {},
+}
+
+func IsSingle(t Token) bool {
+	htmltag := tag(t.Value)
+	_, ok := SingleLineTag[htmltag]
+	return ok
 }
