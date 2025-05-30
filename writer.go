@@ -43,3 +43,42 @@ func (w *W) Ln() {
 	fmt.Fprintln(w.w)
 	w.active = false
 }
+
+// SuppressWriter suppresses multiple newlines and only writes indents if a line is not active.
+type SuppressWriter struct {
+	active bool // Line is active; sutff has been written after a newline
+	w      io.Writer
+}
+
+func NewSuppressWriter(w io.Writer) *SuppressWriter { return &SuppressWriter{w: w} }
+
+func (s *SuppressWriter) Write(data []byte) (int, error) {
+	if s.active && isTabs(data) {
+		return len(data), nil
+	}
+
+	s.active = true
+	if bytes.HasSuffix(data, []byte("\n")) {
+		s.active = false
+	}
+	return s.w.Write(data)
+}
+
+// Ln writes a newline, but only if the line is active.
+func (s *SuppressWriter) Ln() {
+	if !s.active {
+		return
+	}
+	fmt.Fprintln(s.w)
+	s.active = false
+}
+
+// isTabs returns true if all bytes are tabs (and thus is an indent)
+func isTabs(b []byte) bool {
+	for i := range b {
+		if b[i] != '\t' {
+			return false
+		}
+	}
+	return true
+}

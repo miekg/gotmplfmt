@@ -47,7 +47,8 @@ func Reformat(data []byte) {
 		}
 	}
 	if *flagDumb {
-		PrettyDumb(os.Stdout, tokens)
+		w := NewSuppressWriter(os.Stdout)
+		PrettyDumb(w, tokens)
 		return
 	}
 
