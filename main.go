@@ -12,6 +12,7 @@ import (
 var (
 	flagToken = flag.Bool("t", false, "Show the tokens")
 	flagDebug = flag.Bool("d", false, "Show debug information")
+	flagDumb  = flag.Bool("b", false, "Try dumb pretty printing")
 )
 
 func main() {
@@ -45,6 +46,11 @@ func Reformat(data []byte) {
 			fmt.Printf("Type: %v, Subtype: %v, Value: %q\n", token.Type, token.Subtype, token.Value)
 		}
 	}
+	if *flagDumb {
+		PrettyDumb(os.Stdout, tokens)
+		return
+	}
+
 	if *flagDebug {
 		indent += "+"
 	}

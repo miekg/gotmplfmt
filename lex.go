@@ -11,8 +11,8 @@ type TokenType int
 
 const (
 	TokenText     TokenType = iota // Contains plain text of html.
-	TokenTemplate                  // Contains template actions.
-	TokenHTML                      // Contains HTML tags.
+	TokenTemplate                  // Contains template actions. The Subtype contains the actual verb.
+	TokenHTML                      // Contains HTML tags. The Subtype contains OpenTag or CloseTag if this is a block level element.
 )
 
 // Token represents a token in the input text.
@@ -25,6 +25,43 @@ type Token struct {
 // TokenSubtype describe the deeper type of a token, like what kind of template action or if that html is an open tag or not.
 type TokenSubtype int
 
+// TokenIndent returns:
+// 0  - no indententation is required, keep indent level the same (0)
+// 1  - print our token, newline, then increase indent with 1
+// -1 - print a newline, decrease the indent with 1, print our token.
+// -2 - print a newline, decrease the indent with 1, print out token, then newline, then keep indent.
+func TokenIndent(s TokenSubtype) int {
+	switch s {
+	case Pipe:
+		return 0
+	case Block:
+		return 1
+	case Define:
+		return 1
+	case Template:
+		return 0
+	case Break:
+		return 0
+	case Continue:
+		return 0
+	case Else:
+		return -2
+	case If:
+		return 1
+	case Range:
+		return 1
+	case With:
+		return 1
+	case End:
+		return -1
+	case TagOpen:
+		return 1
+	case TagClose:
+		return -1
+	}
+	return 0
+}
+
 const (
 	Pipe TokenSubtype = iota // Pipe is anything in {{ that is not a keyword
 	Block
@@ -33,9 +70,11 @@ const (
 	Break
 	Continue
 	Else
+	// else if caught in Else
 	If
 	Range
 	With
+	// else with caught in With
 	End
 
 	TagOpen
@@ -165,13 +204,16 @@ func (l *Lexer) emit(t TokenType) {
 		// and also trim all multi spaces
 		fields := strings.Fields(value)
 		value = strings.Join(fields, " ")
-		switch {
-		case strings.HasPrefix(value, "</"):
-			subtype = TagClose
-		case strings.HasSuffix(value, "/>"):
-			// none
-		case strings.HasPrefix(value, "<"):
-			subtype = TagOpen
+
+		if !IsInLineTag(value) {
+			switch {
+			case strings.HasPrefix(value, "</"):
+				subtype = TagClose
+			case strings.HasSuffix(value, "/>"):
+				// none
+			case strings.HasPrefix(value, "<"):
+				subtype = TagOpen
+			}
 		}
 	}
 
