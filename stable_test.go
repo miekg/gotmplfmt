@@ -16,23 +16,19 @@ func TestStable(t *testing.T) {
 		t.Errorf("Could not read %q: %s", base+".tmpl", err)
 	}
 
-	lexer := NewLexer(string(buf))
-	tokens := lexer.Lex()
-	tree := Parse(tokens)
-
+	lexer1 := NewLexer(string(buf))
+	tokens1 := lexer1.Lex()
 	pretty1 := &bytes.Buffer{}
-	w := New(pretty1)
-	Pretty(w, tree, 0)
+	w := NewSuppressWriter(pretty1)
+	PrettyDumb(w, tokens1)
 
 	lexer2 := NewLexer(string(buf))
 	tokens2 := lexer2.Lex()
-	tree2 := Parse(tokens2)
 	pretty2 := &bytes.Buffer{}
-	w = New(pretty2)
-	Pretty(w, tree2, 0)
+	w = NewSuppressWriter(pretty2)
+	PrettyDumb(w, tokens2)
 
 	if diff := cmp.Diff(pretty1.String(), pretty2.String()); diff != "" {
 		t.Errorf("TestPretty (%s) mismatch (-want +got):\n%s", base, diff)
 	}
-
 }

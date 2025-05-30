@@ -38,16 +38,13 @@ func TestPretty(t *testing.T) {
 
 			lexer := NewLexer(string(buf))
 			tokens := lexer.Lex()
-			tree := Parse(tokens)
-
 			b := &bytes.Buffer{}
-			w := New(b)
-			Pretty(w, tree, 0)
+			w := NewSuppressWriter(b)
+			PrettyDumb(w, tokens)
 
 			if diff := cmp.Diff(string(prettybuf), b.String()); diff != "" {
 				t.Errorf("TestPretty (%s) mismatch (-want +got):\n%s", f.Name(), diff)
 			}
 		})
 	}
-
 }
