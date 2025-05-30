@@ -20,6 +20,9 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 	// We sometimes write too many newlines, we fix this in "post" with the Flush function.
 	level := 0
 	for _, token := range tokens {
+		if level < 0 {
+			level = 0
+		}
 		printIndent(w, level)
 		ti := TokenIndent(token.Subtype)
 		switch ti {
