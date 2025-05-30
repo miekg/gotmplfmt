@@ -22,6 +22,11 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 	for _, token := range tokens {
 		printIndent(w, level)
 		if token.Type == TokenText {
+			ti := TokenIndent(token.Subtype) // for HTML only open and close are defined and only for block types.
+			if ti != 0 {
+				fmt.Fprintf(w, "%s\n", token.Value)
+				continue
+			}
 			fmt.Fprintf(w, "%s", token.Value)
 			continue
 		}

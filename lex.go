@@ -15,6 +15,18 @@ const (
 	TokenHTML                      // Contains HTML tags. The Subtype contains OpenTag or CloseTag if this is a block level element.
 )
 
+func (t TokenType) String() string {
+	switch t {
+	case TokenText:
+		return "text"
+	case TokenHTML:
+		return "html"
+	case TokenTemplate:
+		return "tmpl"
+	}
+	return ""
+}
+
 // Token represents a token in the input text.
 type Token struct {
 	Type    TokenType
@@ -60,12 +72,15 @@ func TokenIndent(s TokenSubtype) int {
 		return 1
 	case TagClose:
 		return -1
+	case Comment:
+		return 1
 	}
 	return 0
 }
 
 const (
-	Pipe TokenSubtype = iota // Pipe is anything in {{ that is not a keyword
+	None TokenSubtype = iota
+	Pipe              // Pipe is anything in {{ that is not a keyword
 	Block
 	Define
 	Template
@@ -81,6 +96,7 @@ const (
 
 	TagOpen
 	TagClose
+	Comment
 )
 
 var Subtypes = map[string]TokenSubtype{
@@ -138,7 +154,7 @@ func (l *Lexer) emit(t TokenType) {
 	// Same for the end, internal whitespace is reduced to a single space. After this we are left with {{-<space>
 	// (anything else is reject by the go parser) or {{<space>thing, the later is reduced to {{thing. And again also
 	// at the end.
-	subtype := Pipe
+	subtype := None
 	if t == TokenTemplate {
 		value = strings.Join(strings.Fields(value), " ")
 
@@ -177,6 +193,9 @@ func (l *Lexer) emit(t TokenType) {
 		// If the remainder contains 1 newline, we trim the whitespace at the end too.
 		if strings.Count(value, "\n") == 1 {
 			value = strings.TrimRightFunc(value, unicode.IsSpace)
+		}
+		if t == TokenText && strings.HasPrefix(value, "<!--") {
+			subtype = Comment
 		}
 	}
 

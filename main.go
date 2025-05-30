@@ -40,7 +40,7 @@ func Reformat(data []byte) {
 
 	if *flagToken {
 		for _, token := range tokens {
-			fmt.Printf("Type: %v, Subtype: %v, Value: %q\n", token.Type, token.Subtype, token.Value)
+			fmt.Printf("Type: %s, Subtype: %2d, Value: %q\n", token.Type, token.Subtype, token.Value)
 		}
 	}
 	if *flagDebug {
