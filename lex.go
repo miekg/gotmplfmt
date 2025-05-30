@@ -28,6 +28,7 @@ type TokenSubtype int
 // TokenIndent returns:
 // 0  - no indententation is required, keep indent level the same (0)
 // 1  - print our token, newline, then increase indent with 1
+// 2  - print a newline, then our token, then newline, then keep indent.
 // -1 - print a newline, decrease the indent with 1, print our token.
 // -2 - print a newline, decrease the indent with 1, print out token, then newline, then keep indent.
 func TokenIndent(s TokenSubtype) int {
@@ -39,7 +40,7 @@ func TokenIndent(s TokenSubtype) int {
 	case Define:
 		return 1
 	case Template:
-		return 0
+		return 2
 	case Break:
 		return 0
 	case Continue:

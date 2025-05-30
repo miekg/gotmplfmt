@@ -1,0 +1,15 @@
+{{define "mfa.tmpl"}}
+	<article>
+		{{if .Totp.Validated}}
+			{{if has .Grant HELPDESK}}
+				<input value="Disable for {{.User.User}}" />{{hx "err"}}
+			{{end -}}
+		{{else}}
+			{{if eq .Totp.ID 0}}
+				{{hx "err"}}
+			{{else}}
+				<input hx-template="mfa.tmpl" hx-target="#mfa" />
+			{{end}}
+		{{end}}
+	</article>
+{{end}}

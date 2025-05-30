@@ -59,6 +59,9 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 		case 1:
 			fmt.Fprintf(w, "%s\n", token.Value)
 			level += 1
+		case 2:
+			fmt.Fprintln(w)
+			fmt.Fprintf(w, "%s\n", token.Value)
 		}
 	}
 	Flush(w)

@@ -3,5 +3,5 @@
 		 Bla
 	{{else}}
 		bloep 
-	{{end}}
+	{{end -}}
 {{end}}
