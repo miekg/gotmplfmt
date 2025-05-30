@@ -26,11 +26,12 @@ type Token struct {
 type TokenSubtype int
 
 // TokenIndent returns:
-// 0  - no indententation is required, keep indent level the same (0)
-// 1  - print our token, newline, then increase indent with 1
-// 2  - print a newline, then our token, then newline, then keep indent.
-// -1 - print a newline, decrease the indent with 1, print our token.
-// -2 - print a newline, decrease the indent with 1, print out token, then newline, then keep indent.
+//
+//   - 0: no indententation is required, keep indent level the same (0)
+//   - 1: print our token, newline, then increase indent with 1
+//   - 2: print a newline, then our token, then newline, then keep indent.
+//   - -1: print a newline, decrease the indent with 1, print our token.
+//   - -2: print a newline, decrease the indent with 1, print out token, then newline, then keep indent.
 func TokenIndent(s TokenSubtype) int {
 	switch s {
 	case Pipe:
@@ -206,7 +207,7 @@ func (l *Lexer) emit(t TokenType) {
 		fields := strings.Fields(value)
 		value = strings.Join(fields, " ")
 
-		if !IsInLineTag(value) {
+		if !isInLineTag(value) {
 			switch {
 			case strings.HasPrefix(value, "</"):
 				subtype = TagClose

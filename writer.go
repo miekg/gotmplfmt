@@ -38,6 +38,7 @@ func isTabs(b []byte) bool {
 	return true
 }
 
+// Flushes flushes the reformatted template to w. If w is a SuppressWriter any blank lines that are only indentation are removed.
 func Flush(w io.Writer) {
 	s, ok := w.(*SuppressWriter)
 	if !ok {

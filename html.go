@@ -2,7 +2,7 @@ package main
 
 import "unicode"
 
-var InlineTag = map[string]struct{}{
+var inlineTag = map[string]struct{}{
 	"a":        {},
 	"i":        {},
 	"u":        {},
@@ -41,8 +41,8 @@ func htmlTag(s string) (s1 string) {
 	return s1
 }
 
-func IsInLineTag(s string) bool {
+func isInLineTag(s string) bool {
 	tag := htmlTag(s)
-	_, ok := InlineTag[tag]
+	_, ok := inlineTag[tag]
 	return ok
 }
