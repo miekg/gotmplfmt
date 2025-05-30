@@ -6,16 +6,18 @@ import (
 	"strings"
 )
 
+var indent = "\t"
+
 func printIndent(w io.Writer, level int) {
 	if level < 0 {
 		level = 0
 	}
-	io.WriteString(w, strings.Repeat("\t", level))
+	io.WriteString(w, strings.Repeat(indent, level))
 }
 
 // PrettyDumb does not use a tree, just the list of tokens as parsed and indents them as appropiate.
 func PrettyDumb(w io.Writer, tokens []Token) {
-	// we need a writer the suppresses multiple newlines, indent seems OK, but we might need a active as well
+	// We sometimes write too many newline, we fix this in "post" by collapsing \n\n into \n.
 	level := 0
 	for _, token := range tokens {
 		printIndent(w, level)
@@ -59,4 +61,5 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 			level += 1
 		}
 	}
+	Flush(w)
 }
