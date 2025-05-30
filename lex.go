@@ -83,27 +83,6 @@ const (
 	TagClose
 )
 
-// Container returns true if the TokenSubType is a container type.
-func Container(s TokenSubtype) bool {
-	switch s {
-	case Block:
-		fallthrough
-	case Define:
-		fallthrough
-	//	case Else:
-	//		fallthrough
-	case If:
-		fallthrough
-	case Range:
-		fallthrough
-	case With:
-		return true
-	case TagOpen:
-		return true
-	}
-	return false
-}
-
 var Subtypes = map[string]TokenSubtype{
 	"block":    Block,
 	"define":   Define,
