@@ -73,7 +73,7 @@ func TokenIndent(s TokenSubtype) int {
 	case TagClose:
 		return -1
 	case Comment:
-		return 1
+		return 2
 	}
 	return 0
 }
@@ -110,6 +110,7 @@ var Subtypes = map[string]TokenSubtype{
 	"if":       If,
 	"range":    Range,
 	"with":     With,
+	"/*":       Comment,
 }
 
 // Lexer holds the state of the lexer.
