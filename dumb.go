@@ -66,6 +66,7 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 			level += 1
 		case 2:
 			fmt.Fprintln(w)
+			printIndent(w, level)
 			fmt.Fprintf(w, "%s\n", token.Value)
 		}
 	}
