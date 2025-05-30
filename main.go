@@ -10,7 +10,7 @@ import (
 
 var (
 	flagToken = flag.Bool("t", false, "Show the tokens")
-	flagDebug = flag.Bool("d", false, "Show debug information")
+	flagWidth = flag.Int("w", 100, "Maximum line width")
 )
 
 func main() {
@@ -42,9 +42,6 @@ func Reformat(data []byte) {
 		for _, token := range tokens {
 			fmt.Printf("Type: %s, Subtype: %2d, Value: %q\n", token.Type, token.Subtype, token.Value)
 		}
-	}
-	if *flagDebug {
-		indent += "+"
 	}
 
 	w := NewSuppressWriter(os.Stdout)

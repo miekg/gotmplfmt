@@ -10,6 +10,7 @@ import (
 type SuppressWriter struct {
 	active bool // Line is active; sutff has been written after a newline
 	indent bool // Only the indent has been written so far.
+	len    int  // Character written on the current line
 	b      *bytes.Buffer
 	w      io.Writer
 }
@@ -24,6 +25,10 @@ func (s *SuppressWriter) Write(data []byte) (int, error) {
 	s.active = true
 	if bytes.HasSuffix(data, []byte("\n")) {
 		s.active = false
+		s.len = 0
+	}
+	if s.active {
+		s.len += len(data)
 	}
 	return s.b.Write(data)
 }
@@ -36,6 +41,14 @@ func isTabs(b []byte) bool {
 		}
 	}
 	return true
+}
+
+func Len(w io.Writer) int {
+	s, ok := w.(*SuppressWriter)
+	if !ok {
+		return 0
+	}
+	return s.len
 }
 
 // Flushes flushes the reformatted template to w. If w is a SuppressWriter any blank lines that are only indentation are removed.

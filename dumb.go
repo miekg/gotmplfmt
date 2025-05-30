@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var indent = "\t"
+const indent = "\t"
 
 func printIndent(w io.Writer, level int) {
 	if level < 0 {
@@ -41,6 +41,10 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 			fmt.Fprintln(w)
 			printIndent(w, level)
 			fmt.Fprintf(w, "%s\n", token.Value)
+		}
+		if Len(w) > *flagWidth {
+			fmt.Fprintln(w)
+			printIndent(w, level)
 		}
 	}
 	Flush(w)
