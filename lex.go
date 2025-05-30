@@ -37,6 +37,14 @@ type Token struct {
 // TokenSubtype describe the deeper type of a token, like what kind of template action or if that html is an open tag or not.
 type TokenSubtype int
 
+const (
+	IndentKeep        = 0
+	IndentInc         = 1
+	IndentDec         = -1
+	IndentNewlineKeep = 2
+	IndentDecKeep     = -2
+)
+
 // TokenIndent returns:
 //
 //   - 0: no indententation is required, keep indent level the same (0)
@@ -47,33 +55,35 @@ type TokenSubtype int
 func TokenIndent(s TokenSubtype) int {
 	switch s {
 	case Pipe:
-		return 0
+		return IndentKeep
 	case Block:
-		return 1
+		return IndentInc
 	case Define:
-		return 1
+		return IndentInc
 	case Template:
-		return 2
+		return IndentNewlineKeep
 	case Break:
-		return 0
+		return IndentKeep
 	case Continue:
-		return 0
+		return IndentKeep
 	case Else:
-		return -2
+		return IndentDecKeep
 	case If:
-		return 1
+		return IndentInc
 	case Range:
-		return 1
+		return IndentInc
 	case With:
-		return 1
+		return IndentInc
 	case End:
-		return -1
+		return IndentDec
 	case TagOpen:
-		return 1
+		return IndentInc
 	case TagClose:
-		return -1
+		return IndentDec
+	case TagNoop:
+		return IndentNewlineKeep
 	case Comment:
-		return 2
+		return IndentNewlineKeep
 	}
 	return 0
 }
@@ -96,6 +106,7 @@ const (
 
 	TagOpen
 	TagClose
+	TagNoop
 	Comment
 )
 
@@ -214,6 +225,9 @@ func (l *Lexer) emit(t TokenType) {
 				// none
 			case strings.HasPrefix(value, "<"):
 				subtype = TagOpen
+			}
+			if isOpenOnceTag(value) {
+				subtype = TagNoop
 			}
 		}
 	}

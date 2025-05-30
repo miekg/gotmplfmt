@@ -27,6 +27,15 @@ var inlineTag = map[string]struct{}{
 	"sup":      {},
 }
 
+var openOnceTag = map[string]struct{}{
+	"html": {},
+	"body": {},
+	"head": {},
+	"meta": {},
+	"main": {},
+	"nav":  {},
+}
+
 // htmlTag takes an HTML elements and returns the tag.
 func htmlTag(s string) (s1 string) {
 	for _, r := range s {
@@ -44,5 +53,11 @@ func htmlTag(s string) (s1 string) {
 func isInLineTag(s string) bool {
 	tag := htmlTag(s)
 	_, ok := inlineTag[tag]
+	return ok
+}
+
+func isOpenOnceTag(s string) bool {
+	tag := htmlTag(s)
+	_, ok := openOnceTag[tag]
 	return ok
 }

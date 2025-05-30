@@ -15,29 +15,29 @@ func printIndent(w io.Writer, level int) {
 	io.WriteString(w, strings.Repeat(indent, level))
 }
 
-// PrettyDumb does not use a tree, just the list of tokens as parsed and indents them as appropiate.
+// PrettyDumb does not use a tree, just the list of tokens as parsed and indents them as appropriate.
 func PrettyDumb(w io.Writer, tokens []Token) {
-	// We sometimes write too many newline, we fix this in "post" by collapsing \n\n into \n.
+	// We sometimes write too many newlines, we fix this in "post" with the Flush function.
 	level := 0
 	for _, token := range tokens {
 		printIndent(w, level)
 		ti := TokenIndent(token.Subtype)
 		switch ti {
-		case -2:
+		case IndentDecKeep:
 			fmt.Fprintln(w)
 			printIndent(w, level-1)
 			fmt.Fprintf(w, "%s\n", token.Value)
-		case -1:
+		case IndentDec:
 			fmt.Fprintln(w)
 			printIndent(w, level-1)
 			fmt.Fprintf(w, "%s\n", token.Value)
 			level -= 1
-		case 0:
+		case IndentKeep:
 			fmt.Fprintf(w, "%s", token.Value)
-		case 1:
+		case IndentInc:
 			fmt.Fprintf(w, "%s\n", token.Value)
 			level += 1
-		case 2:
+		case IndentNewlineKeep:
 			fmt.Fprintln(w)
 			printIndent(w, level)
 			fmt.Fprintf(w, "%s\n", token.Value)
