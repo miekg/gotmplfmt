@@ -15,6 +15,18 @@ func printIndent(w io.Writer, level int) {
 	io.WriteString(w, strings.Repeat(indent, level))
 }
 
+func linesIndent(s string, level int) string {
+	lines := strings.Split(s, "\n")
+	ind := strings.Repeat(indent, level)
+	for i := range lines {
+		if i == 0 {
+			continue // first indent already writen above
+		}
+		lines[i] = ind + strings.TrimSpace(lines[i])
+	}
+	return strings.Join(lines, "\n")
+}
+
 // PrettyDumb does not use a tree, just the list of tokens as parsed and indents them as appropriate.
 func PrettyDumb(w io.Writer, tokens []Token) {
 	// We sometimes write too many newlines, we fix this in "post" with the Flush function.
@@ -24,6 +36,12 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 			level = 0
 		}
 		printIndent(w, level)
+		// embeded text with newline, like long comments need special treatment, to get indenting of each line
+		// correct. Can only be done here, because we have the indent level handy.
+		if token.Type == TokenText && strings.Count(token.Value, "\n") > 2 {
+			token.Value = linesIndent(token.Value, level)
+		}
+
 		ti := TokenIndent(token.Subtype)
 		switch ti {
 		case IndentDecKeep:
