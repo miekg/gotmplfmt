@@ -38,6 +38,8 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 		case IndentKeep:
 			fmt.Fprintf(w, "%s", token.Value)
 		case IndentInc:
+			fmt.Fprintln(w)
+			printIndent(w, level)
 			fmt.Fprintf(w, "%s\n", token.Value)
 			level += 1
 		case IndentNewlineKeep:
