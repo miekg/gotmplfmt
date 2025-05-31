@@ -52,19 +52,47 @@ func Len(w io.Writer) int {
 }
 
 // Flushes flushes the reformatted template to w. If w is a SuppressWriter any blank lines that are only indentation are removed.
+// For a define and block a newline is inserted.
 func Flush(w io.Writer) {
 	s, ok := w.(*SuppressWriter)
 	if !ok {
 		return
 	}
 	sc := bufio.NewScanner(s.b)
+	i := 0
 	for sc.Scan() {
 		// if the line is indent + newline, suppress
 		line := sc.Bytes()
 		if isTabs(line) {
 			continue
 		}
+		if i > 0 && extraNewline(line) {
+			s.w.Write([]byte("\n"))
+		}
+
 		s.w.Write(line)
 		s.w.Write([]byte("\n"))
+		i++
 	}
+}
+
+// Should be done in the lexer, not here...
+func extraNewline(line []byte) bool {
+	if !bytes.HasPrefix(line, []byte("{{")) {
+		return false
+	}
+
+	if ok := bytes.HasPrefix(line, []byte("{{define ")); ok {
+		return true
+	}
+	if ok := bytes.HasPrefix(line, []byte("{{- define ")); ok {
+		return true
+	}
+	if ok := bytes.HasPrefix(line, []byte("{{block ")); ok {
+		return true
+	}
+	if ok := bytes.HasPrefix(line, []byte("{{- block ")); ok {
+		return true
+	}
+	return false
 }
