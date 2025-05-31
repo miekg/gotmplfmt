@@ -66,7 +66,7 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 			fmt.Fprintf(w, "%s\n", token.Value)
 		}
 		if Len(w) > *flagWidth {
-			fmt.Fprintln(w, level)
+			fmt.Fprintln(w)
 			printIndent(w, level)
 		}
 	}
