@@ -10,7 +10,7 @@ import (
 
 var (
 	flagToken = flag.Bool("t", false, "Show the tokens")
-	flagWidth = flag.Int("w", 100, "Maximum line width")
+	flagWidth = flag.Int("w", 120, "Maximum line width")
 )
 
 func main() {
