@@ -1,6 +1,6 @@
 %%%
 title = "gotmplfmt 1"
-area = "Gnu"
+area = "user commands"
 workgroup = "Go"
 %%%
 
@@ -10,7 +10,7 @@ gotmplfmt - format Go HTML template files
 
 # SYNOPSIS
 
-**dnsfmt** [**FILE**]...
+**gotmplfmt** [**FILE**]...
 
 # DESCRIPTION
 
@@ -19,10 +19,9 @@ gotmplfmt - format Go HTML template files
 The zone is formatted according to the following rules:
 
 - tabs are used for indentation
-- the structure of open HTML tags and template verbs is followed
-
-For partial template effort is made to do the right thing, but as these can contain non-closed tags and
-open if-then-else chains the result is not always what you expect.
+- the structure of open HTML tags and template verbs is followed, except for html, body, head, meta,
+  main or nav tag .
+- before a {{block}} or {{define}} an extra newline is introduced
 
 Note: you _can_ use this on Go text templates, but as whitespace is significant there, it will lead
 to "corrupt" output.
@@ -31,35 +30,25 @@ to "corrupt" output.
 
 There are two debugging options:
 
-`-d`
-: show debug output (tabs are shown as +)
+`-w` _WIDTH_
+: use _WIDTH_ as line width
 
 `-t`
 : show the lexed tokens
 
 # EXAMPLE
 
-    % cat <<'EOF' | ./dnsfmt
-    $TTL 6H
-    $ORIGIN example.org.
-    @       IN      SOA     ns miek.miek.nl. 1282630067  4H 1H 7D 7200
-                    IN      NS  ns
-    example.org.            IN      NS  ns-ext.nlnetlabs.nl.
+    % cat <<'EOF' | ./gotmplfmt
+    {{- if .Flash}} BLAAT {{else if not .Flash}} {{hallo}} {{meer}} BLOET {{end -}}
     EOF
 
 Returns:
 
-    $TTL 6H
-    $ORIGIN example.org.
-    @               IN   SOA        ns miek.miek.nl. (
-                                       1712997354   ; serial  Sat, 13 Apr 2024 08:35:54 UTC
-                                       4H           ; refresh
-                                       1H           ; retry
-                                       1W           ; expire
-                                       2H           ; minimum
-                                       )
-                    IN   NS         ns
-                    IN   NS         ns-ext.nlnetlabs.nl.
+    {{- if .Flash}}
+             BLAAT
+    {{else if not .Flash}}
+            {{hallo}}{{meer}} BLOET
+    {{end -}}
 
 # AUTHOR
 
