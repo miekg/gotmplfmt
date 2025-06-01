@@ -78,20 +78,22 @@ func Flush(w io.Writer) {
 
 // Should be done in the lexer, not here...
 func extraNewline(line []byte) bool {
-	if !bytes.HasPrefix(line, []byte("{{")) {
+	l1 := bytes.TrimSpace(line)
+
+	if !bytes.HasPrefix(l1, []byte("{{")) {
 		return false
 	}
 
-	if ok := bytes.HasPrefix(line, []byte("{{define ")); ok {
+	if ok := bytes.HasPrefix(l1, []byte("{{define ")); ok {
 		return true
 	}
-	if ok := bytes.HasPrefix(line, []byte("{{- define ")); ok {
+	if ok := bytes.HasPrefix(l1, []byte("{{- define ")); ok {
 		return true
 	}
-	if ok := bytes.HasPrefix(line, []byte("{{block ")); ok {
+	if ok := bytes.HasPrefix(l1, []byte("{{block ")); ok {
 		return true
 	}
-	if ok := bytes.HasPrefix(line, []byte("{{- block ")); ok {
+	if ok := bytes.HasPrefix(l1, []byte("{{- block ")); ok {
 		return true
 	}
 	return false
