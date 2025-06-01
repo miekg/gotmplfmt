@@ -1,0 +1,9 @@
+{{define "1.tmpl"}}
+	<article>
+	</article>
+{{end}}
+
+{{define "2.tmpl"}}
+	<article>
+	</article>
+{{end}}

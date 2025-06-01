@@ -1,0 +1,5 @@
+{{- if .Flash}}
+	 BLAAT 
+{{else if not .Flash}}
+	{{hallo}}{{meer}} BLOET 
+{{end -}}
