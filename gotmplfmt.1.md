@@ -20,7 +20,7 @@ The zone is formatted according to the following rules:
 
 - tabs are used for indentation
 - the structure of open HTML tags and template verbs is followed, except for html, body, head, meta,
-  main or nav tag .
+  main or nav tag
 - before a {{block}} or {{define}} an extra newline is introduced
 
 Note: you _can_ use this on Go text templates, but as whitespace is significant there, it will lead
@@ -28,7 +28,7 @@ to "corrupt" output.
 
 # OPTIONS
 
-There are two debugging options:
+There are is one options (and a debugging one):
 
 `-w` _WIDTH_
 : use _WIDTH_ as line width
