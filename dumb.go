@@ -22,7 +22,7 @@ func linesIndent(s string, level int) string {
 		if i == 0 {
 			continue // first indent already writen above
 		}
-		lines[i] = ind + strings.TrimSpace(lines[i])
+		lines[i] = ind + lines[i]
 	}
 	return strings.Join(lines, "\n")
 }
