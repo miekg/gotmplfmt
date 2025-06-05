@@ -1,0 +1,7 @@
+<form>
+	<label>Comment</label>
+	<fieldset role="group">
+		<textarea rows="1" name="comment" oninput="document.getElementsByName('submit-comment')[0].removeAttribute('disabled');" placeholder="...">{{.User.Comment.String}}</textarea>
+		<input type="submit" name="submit-comment" hx-template="n/a" disabled value="Update Comment" hx-patch="/-/user/{{.User.User}}"/>
+	</fieldset>
+</form>

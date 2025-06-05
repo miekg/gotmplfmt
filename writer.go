@@ -8,9 +8,10 @@ import (
 
 // SuppressWriter suppresses multiple newlines and only writes indents if a line is not active.
 type SuppressWriter struct {
-	active bool // Line is active; sutff has been written after a newline
+	active bool // Line is active; sutff has been written after a newline.
 	indent bool // Only the indent has been written so far.
-	len    int  // Character written on the current line
+	len    int  // Character written on the current line.
+	keep   bool // Dont insert line breaks, this is (only?) important for textarea tags, as ws is significant tere.
 	b      *bytes.Buffer
 	w      io.Writer
 }
@@ -20,6 +21,15 @@ func NewSuppressWriter(w io.Writer) *SuppressWriter { return &SuppressWriter{w: 
 func (s *SuppressWriter) Write(data []byte) (int, error) {
 	if s.active && isTabs(data) {
 		return len(data), nil
+	}
+
+	if s.keep && bytes.Equal(data, []byte("\n")) {
+		return len(data), nil
+	}
+
+	// this will break with wrongly nested tags as we don't see if its open or close...
+	if tag := htmlTag(string(data)); tag == "textarea" {
+		s.keep = !s.keep
 	}
 
 	s.active = true
