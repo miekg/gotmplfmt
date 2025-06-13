@@ -1,8 +1,10 @@
 # gotmplfmt
 
-Fmt Go HTML templates. There is one option. The indenting used is 1 tab - this allow your terminal's tab
-width setting to do its work. The formatter is rather simple, there is no AST creation, it just iterates over
-a list of tokens.
+Fmt Go HTML templates.
+
+Gotmplfmt only has one option (setting the width). The indenting used is 1 tab - this allow your editors's tab
+setting to do its work. The formatter is rather simple, there is no AST creation, it just iterates over a list
+of tokens. (An AST was tried, but it being to smart/advanced it lead to problems).
 
 Before a {{block}} or {{define}} an extra newline is introduced.
 
