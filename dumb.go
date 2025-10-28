@@ -20,7 +20,7 @@ func linesIndent(s string, level int) string {
 	ind := strings.Repeat(indent, level)
 	for i := range lines {
 		if i == 0 {
-			continue // first indent already writen above
+			continue // first indent already written above
 		}
 		lines[i] = ind + lines[i]
 	}
@@ -36,7 +36,7 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 			level = 0
 		}
 		printIndent(w, level)
-		// embeded text with newline, like long comments need special treatment, to get indenting of each line
+		// embedded text with newline, like long comments need special treatment, to get indenting of each line
 		// correct. Can only be done here, because we have the indent level handy.
 		if token.Type == TokenText && strings.Count(token.Value, "\n") > 2 {
 			token.Value = linesIndent(token.Value, level)

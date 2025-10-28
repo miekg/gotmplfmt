@@ -162,7 +162,7 @@ func (l *Lexer) next() rune {
 func (l *Lexer) emit(t TokenType) {
 	value := l.input[l.start:l.pos]
 
-	// some cleanup TokenTemplates, {{<space>thing is reduced to {{thing, execpt for {{-, then it is {{- thing.
+	// some cleanup TokenTemplates, {{<space>thing is reduced to {{thing, except for {{-, then it is {{- thing.
 	// Same for the end, internal whitespace is reduced to a single space. After this we are left with {{-<space>
 	// (anything else is reject by the go parser) or {{<space>thing, the later is reduced to {{thing. And again also
 	// at the end.
