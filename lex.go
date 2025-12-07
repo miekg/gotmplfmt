@@ -39,6 +39,7 @@ type TokenSubtype int
 
 const (
 	IndentKeep        = 0
+	IndentKeepNewline = 3
 	IndentInc         = 1
 	IndentDec         = -1
 	IndentNewlineKeep = 2
@@ -55,7 +56,7 @@ const (
 func TokenIndent(s TokenSubtype) int {
 	switch s {
 	case Pipe:
-		return IndentKeep
+		return IndentKeepNewline
 	case Block:
 		return IndentInc
 	case Define:
@@ -85,7 +86,7 @@ func TokenIndent(s TokenSubtype) int {
 	case Comment:
 		return IndentNewlineKeep
 	}
-	return 0
+	return IndentKeep
 }
 
 const (
@@ -187,6 +188,22 @@ func (l *Lexer) emit(t TokenType) {
 			case strings.HasPrefix(value, "{{- "+s):
 				subtype = Subtypes[s]
 				break Loop
+
+			default:
+				// Quick fix to keep short pipe tokens inline,
+				// while adding new line after longer ones.
+				//
+				// E.g.:
+				// <span>{{.}}</span>
+				//
+				// {{ partialCached "head/css.html" . }}
+				// {{ partialCached "head/js.html" . }}
+				//
+				// This is however, not really elegant.
+
+				if len(value) >= 25 {
+					subtype = Pipe
+				}
 			}
 		}
 	}
