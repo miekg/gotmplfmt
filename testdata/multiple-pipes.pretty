@@ -1,0 +1,3 @@
+{{partialCached "head/css.html" .}}
+{{partialCached "head/js.html" .}}
+<span>{{short}}</span>
