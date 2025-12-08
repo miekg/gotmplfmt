@@ -39,11 +39,11 @@ type TokenSubtype int
 
 const (
 	IndentKeep        = 0
-	IndentKeepNewline = 3
 	IndentInc         = 1
 	IndentDec         = -1
 	IndentNewlineKeep = 2
 	IndentDecKeep     = -2
+	IndentKeepNewline = 3
 )
 
 // TokenIndent returns:
