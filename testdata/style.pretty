@@ -1,0 +1,10 @@
+<style type="text/tailwindcss">
+@theme {
+            /* --- Colors --- */
+            --color-primary: #11172b;
+        }
+        @keyframes scan {
+            0% { top: 5%; opacity: 0; }
+            100% { top: 95%; opacity: 0; }
+        }
+</style>

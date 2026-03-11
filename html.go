@@ -28,12 +28,14 @@ var inlineTag = map[string]struct{}{
 }
 
 var openOnceTag = map[string]struct{}{
-	"html": {},
-	"body": {},
-	"head": {},
-	"meta": {},
-	"main": {},
-	"nav":  {},
+	"html":   {},
+	"body":   {},
+	"head":   {},
+	"meta":   {},
+	"main":   {},
+	"nav":    {},
+	"style":  {},
+	"script": {},
 }
 
 // htmlTag takes an HTML elements and returns the tag.
