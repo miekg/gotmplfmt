@@ -1,6 +1,6 @@
 # gotmplfmt
 
-Fmt Go HTML templates.
+Format Go HTML templates (\*.gotmpl).
 
 Gotmplfmt only has one option (setting the width). The indenting used is 1 tab - this allow your editor's tab
 setting to do its work. The formatter is rather simple, there is no AST creation, it just iterates over a list
@@ -32,6 +32,12 @@ instead of:
 ```
 
 where the second `<body>` would indent the template even further.
+
+`<style>` and `<script>` tag contents are not formatted, as they are usually
+not HTML but CSS and JavaScript respectively.
+
+This is to prevent the formatter from breaking the CSS and JavaScript code and
+best left to something like Prettier.
 
 ## Usage
 
