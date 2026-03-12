@@ -1,0 +1,11 @@
+{{- if eq hugo.Environment "development"}}
+	{{- range $css := $cssFiles}}
+		<link rel="stylesheet" href="{{ $css.RelPermalink }}">
+	{{- end}}
+{{- else}}
+	{{- range $css := $cssFiles}}
+		{{- with $css | minify | fingerprint}}
+			<link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+		{{- end}}
+	{{- end}}
+{{- end}}

@@ -38,6 +38,13 @@ var openOnceTag = map[string]struct{}{
 	"script": {},
 }
 
+// Tags that do not have />, but just >
+var autoCloseTag = map[string]struct{}{
+	"base": {},
+	"meta": {},
+	"link": {},
+}
+
 // htmlTag takes an HTML elements and returns the tag.
 func htmlTag(s string) (s1 string) {
 	for _, r := range s {
@@ -61,5 +68,11 @@ func isInLineTag(s string) bool {
 func isOpenOnceTag(s string) bool {
 	tag := htmlTag(s)
 	_, ok := openOnceTag[tag]
+	return ok
+}
+
+func isAutoCloseTag(s string) bool {
+	tag := htmlTag(s)
+	_, ok := autoCloseTag[tag]
 	return ok
 }
