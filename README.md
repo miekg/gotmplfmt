@@ -4,7 +4,9 @@ Fmt Go HTML templates.
 
 Gotmplfmt only has one option (setting the width). The indenting used is 1 tab - this allow your editor's tab
 setting to do its work. The formatter is rather simple, there is no AST creation, it just iterates over a list
-of tokens. (An AST was tried, but it being to smart/advanced it lead to problems).
+of tokens. An AST was tried, but it being to smart/advanced it lead to problems, specifically usually the tree
+is a broken AST, missing close tags. Also which AST? The template one, of the HTML one? And templates may be
+partial which leads to more brokenness, hence a dumber approach was needed.
 
 Before a {{block}} or {{define}} an extra newline is introduced.
 
