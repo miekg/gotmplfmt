@@ -1,0 +1,5 @@
+<script>
+function test() {
+            console.log("hello");
+        }
+</script>
