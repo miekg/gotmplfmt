@@ -212,7 +212,7 @@ func (l *Lexer) emit(t TokenType) {
 	}
 
 	if t == TokenHTML {
-		value = strings.Replace(value, "\n", "", -1) // remove all newlines inside a html tag
+		value = strings.ReplaceAll(value, "\n", "") // remove all newlines inside a html tag
 		// and also trim all multi spaces
 		fields := strings.Fields(value)
 		value = strings.Join(fields, " ")
@@ -222,6 +222,8 @@ func (l *Lexer) emit(t TokenType) {
 			case strings.HasPrefix(value, "</"):
 				subtype = TagClose
 			case strings.HasSuffix(value, "/>"):
+				// none
+			case strings.HasSuffix(value, ">") && isAutoCloseTag(value):
 				// none
 			case strings.HasPrefix(value, "<"):
 				subtype = TagOpen
