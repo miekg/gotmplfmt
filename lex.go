@@ -85,6 +85,8 @@ func TokenIndent(s TokenSubtype) int {
 		return IndentNewlineKeep
 	case Comment:
 		return IndentNewlineKeep
+	case RawTagClose:
+		return IndentKeep
 	}
 	return IndentKeep
 }
@@ -109,6 +111,8 @@ const (
 	TagClose
 	TagNoop
 	Comment
+	RawText     // Text inside style/script tags that should not be reformatted
+	RawTagClose // Closing tag for style/script
 )
 
 var Subtypes = map[string]TokenSubtype{
@@ -127,11 +131,13 @@ var Subtypes = map[string]TokenSubtype{
 
 // Lexer holds the state of the lexer.
 type Lexer struct {
-	input  string
-	start  int
-	pos    int
-	width  int
-	tokens []Token
+	input      string
+	start      int
+	pos        int
+	width      int
+	tokens     []Token
+	inRawTag   bool   // true when inside <style> or <script>
+	rawTagName string // name of the raw tag we're inside
 }
 
 // NewLexer creates a new lexer for the given input.
@@ -211,6 +217,13 @@ func (l *Lexer) emit(t TokenType) {
 	defer func() { l.start = l.pos }()
 
 	if t == TokenText || t == TokenHTML {
+		// If we're inside a raw tag (style/script), mark text as RawText and don't trim
+		if t == TokenText && l.inRawTag {
+			subtype = RawText
+			l.tokens = append(l.tokens, Token{Type: t, Value: value, Subtype: subtype})
+			return
+		}
+
 		// If the token start with spaces and when trimmed is empty, we skip this token.
 		if trimmed := strings.TrimLeftFunc(value, unicode.IsSpace); len(trimmed) == 0 {
 			return
@@ -237,13 +250,27 @@ func (l *Lexer) emit(t TokenType) {
 		if !isInLineTag(value) {
 			switch {
 			case strings.HasPrefix(value, "</"):
-				subtype = TagClose
+				// Check if we're closing a raw tag
+				tag := htmlTag(value)
+				if tag == l.rawTagName {
+					subtype = RawTagClose
+					l.inRawTag = false
+					l.rawTagName = ""
+				} else {
+					subtype = TagClose
+				}
 			case strings.HasSuffix(value, "/>"):
 				// none
 			case strings.HasSuffix(value, ">") && isAutoCloseTag(value):
 				// none
 			case strings.HasPrefix(value, "<"):
 				subtype = TagOpen
+				// Check if we're opening a raw tag
+				tag := htmlTag(value)
+				if tag == "style" || tag == "script" {
+					l.inRawTag = true
+					l.rawTagName = tag
+				}
 			}
 			if isOpenOnceTag(value) {
 				subtype = TagNoop
