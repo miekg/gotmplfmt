@@ -35,6 +35,11 @@ func PrettyDumb(w io.Writer, tokens []Token) {
 		if level < 0 {
 			level = 0
 		}
+		// RawText (inside style/script tags) should be written as-is to preserve formatting
+		if token.Subtype == RawText {
+			fmt.Fprintf(w, "%s", token.Value)
+			continue
+		}
 		printIndent(w, level)
 		// embedded text with newline, like long comments need special treatment, to get indenting of each line
 		// correct. Can only be done here, because we have the indent level handy.
